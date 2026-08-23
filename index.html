@@ -47,8 +47,10 @@
   .pcard.leader .tot{color:var(--orange)}
   .pcard .gapline{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:2px}
   .pcard .sub2{font-size:12px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace}
-  .pcard .bnl{font-size:12px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--no)}
-  .pcard .bnl.zero{color:var(--yes)}
+  .pcard .bnl{font-size:12px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-weight:700;display:flex;gap:12px;flex-wrap:wrap}
+  .pcard .bnl .kom{color:var(--gold)}
+  .pcard .bnl .bx{color:var(--no)}
+  .pcard .bnl .bx.zero{color:var(--yes)}
   .pcard .pwr{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
   .pcard .pwr .pk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px}
   .pcard .pwr .pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
@@ -195,13 +197,18 @@ D.segs.forEach(sg=>{
   });
 });
 
-// ---- boned tally (dead last among actual finishers on a segment) ----
+// ---- boned tally (dead last among actual finishers) + KOM tally (fastest) ----
 const bonedCount = {Ali:0, Jake:0, Randee:0, Michael:0};
+const komCount = {Ali:0, Jake:0, Randee:0, Michael:0};
 D.segs.forEach(sg=>{
   const fin = sg.riders.filter(r=>r.sec!=null);
   if (fin.length<2) return;
   const worst = Math.max(...fin.map(r=>r.sec));
-  fin.forEach(r=>{ if (r.sec===worst) bonedCount[r.name]++; });
+  const best = Math.min(...fin.map(r=>r.sec));
+  fin.forEach(r=>{
+    if (r.sec===worst) bonedCount[r.name]++;
+    if (r.sec===best) komCount[r.name]++;
+  });
 });
 
 // ---- power per kilo ----
@@ -246,7 +253,8 @@ const powerRows = {};
       '<div class="tot">'+fmtClock(t)+'</div>'+
       '<div class="gapline">'+gapline+'</div>'+
       '<div class="sub2">'+ridden[name]+' of '+D.segs.length+' segments ridden'+penTxt+'</div>'+
-      '<div class="bnl'+(bonedCount[name]?'':' zero')+'">'+(bonedCount[name]?'got boned '+bonedCount[name]+'x':'never been boned')+'</div>'+
+      '<div class="bnl"><span class="kom">👑 '+komCount[name]+' KOM'+(komCount[name]===1?'':'s')+'</span>'+
+      '<span class="bx'+(bonedCount[name]?'':' zero')+'">'+(bonedCount[name]?'got boned '+bonedCount[name]+'x':'never been boned')+'</span></div>'+
       '<div class="pwr"><span class="pk">Power · W/kg · best efforts</span><div class="pgrid">'+
         powerRows[name].map(([lbl,v])=>'<div class="pc"><div class="pd">'+lbl+'</div><div class="pv">'+(v||'–')+'</div></div>').join('')+
       '</div></div>'+
