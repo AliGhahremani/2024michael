@@ -47,6 +47,8 @@
   .pcard.leader .tot{color:var(--orange)}
   .pcard .gapline{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:2px}
   .pcard .sub2{font-size:12px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace}
+  .pcard .bnl{font-size:12px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--no)}
+  .pcard .bnl.zero{color:var(--yes)}
   .pcard .pwr{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
   .pcard .pwr .pk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px}
   .pcard .pwr .pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
@@ -193,7 +195,22 @@ D.segs.forEach(sg=>{
   });
 });
 
-// ---- power per kilo (best avg watts from tracked segment efforts) ----
+// ---- boned tally (dead last among actual finishers on a segment) ----
+const bonedCount = {Ali:0, Jake:0, Randee:0, Michael:0};
+D.segs.forEach(sg=>{
+  const fin = sg.riders.filter(r=>r.sec!=null);
+  if (fin.length<2) return;
+  const worst = Math.max(...fin.map(r=>r.sec));
+  fin.forEach(r=>{ if (r.sec===worst) bonedCount[r.name]++; });
+});
+
+// ---- power per kilo ----
+// Real Strava best-effort watts where the rider has shared them (Strava keeps
+// these private per account, so each rider sends their own numbers).
+// Fallback: best avg watts from tracked segment efforts.
+const POWER_W = {
+  Ali: {"5 min":328, "10 min":301, "20 min":260, "30 min":233, "1 hr":220}
+};
 const PWINDOWS = [["5 min",300],["10 min",600],["20 min",1200],["30 min",1800],["1 hr",3600]];
 const powerRows = {};
 (function(){
@@ -201,6 +218,8 @@ const powerRows = {};
   D.segs.forEach(sg=>sg.riders.forEach(r=>{ if(r.sec!=null && r.watts) efforts[r.name].push([r.sec, r.watts]); }));
   for (const name in efforts){
     powerRows[name] = PWINDOWS.map(([lbl,w])=>{
+      const real = POWER_W[name] && POWER_W[name][lbl];
+      if (real) return [lbl, (real/KG[name]).toFixed(2)];
       const cand = efforts[name].filter(e=>e[0] >= 0.8*w).map(e=>e[1]);
       return [lbl, cand.length ? (Math.max(...cand)/KG[name]).toFixed(2) : null];
     });
@@ -227,7 +246,8 @@ const powerRows = {};
       '<div class="tot">'+fmtClock(t)+'</div>'+
       '<div class="gapline">'+gapline+'</div>'+
       '<div class="sub2">'+ridden[name]+' of '+D.segs.length+' segments ridden'+penTxt+'</div>'+
-      '<div class="pwr"><span class="pk">Power · W/kg · best tracked efforts</span><div class="pgrid">'+
+      '<div class="bnl'+(bonedCount[name]?'':' zero')+'">'+(bonedCount[name]?'got boned '+bonedCount[name]+'x':'never been boned')+'</div>'+
+      '<div class="pwr"><span class="pk">Power · W/kg · best efforts</span><div class="pgrid">'+
         powerRows[name].map(([lbl,v])=>'<div class="pc"><div class="pd">'+lbl+'</div><div class="pv">'+(v||'–')+'</div></div>').join('')+
       '</div></div>'+
       '</div></div>';
