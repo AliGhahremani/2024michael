@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>2024 Michael · Are You Stronger?</title>
-<meta name="description" content="Thirteen segments. Four riders. One benchmark: 2024 Michael.">
+<meta name="description" content="Fifteen segments. Four riders. One benchmark: 2024 Michael.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚴</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -12,55 +12,57 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
-    --bg:#0c0c0e; --card:#151519; --card2:#1b1b21; --line:#26262e;
-    --text:#f2f0ec; --muted:#8f8d98; --orange:#fc5200; --orange-soft:#ff7a38;
-    --yes:#2fd67b; --no:#ff4d5e; --gold:#ffcf5c;
+    --bg:#f7f7fa; --card:#ffffff; --card2:#f2f2f5; --line:#e3e3e8;
+    --text:#242428; --muted:#6d6d78; --orange:#fc5200; --orange-soft:#e04a00;
+    --yes:#12813f; --no:#d8283e; --gold:#b56a00;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--text);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   .wrap{max-width:1060px;margin:0 auto;padding:0 20px}
-  .hero{position:relative;padding:84px 0 56px;overflow:hidden;
-    background:radial-gradient(900px 420px at 75% -10%, rgba(252,82,0,.18), transparent 60%),
-      radial-gradient(600px 300px at 10% 0%, rgba(252,82,0,.07), transparent 60%);
+  .hero{position:relative;padding:72px 0 50px;overflow:hidden;background:#fff;
+    background:linear-gradient(180deg,#fff 0%,#fff 60%,#f7f7fa 100%);
     border-bottom:1px solid var(--line);}
+  .hero::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--orange)}
   .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.28em;color:var(--orange);text-transform:uppercase;margin-bottom:18px}
-  h1{font-family:'Archivo Black','Archivo',sans-serif;font-size:clamp(38px,7vw,76px);line-height:.98;text-transform:uppercase;letter-spacing:-.01em}
+  h1{font-family:'Archivo Black','Archivo',sans-serif;font-size:clamp(38px,7vw,76px);line-height:.98;text-transform:uppercase;letter-spacing:-.01em;color:#1c1c20}
   h1 .q{color:var(--orange)}
   .hero p.sub{margin-top:20px;max-width:560px;color:var(--muted);font-size:17px}
-  .hero .mp{margin-top:26px;display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 20px 9px 12px;font-size:14px}
-  .hero .mp .dot{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ffb38a);display:flex;align-items:center;justify-content:center;font-family:'Archivo Black';font-size:13px;color:#1a0d05;overflow:hidden}
+  .hero .mp{margin-top:26px;display:inline-flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 20px 9px 12px;font-size:14px;box-shadow:0 1px 4px rgba(20,20,30,.06)}
+  .hero .mp .dot{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ffb38a);display:flex;align-items:center;justify-content:center;font-family:'Archivo Black';font-size:13px;color:#fff;overflow:hidden}
   .hero .mp .dot img{width:100%;height:100%;object-fit:cover}
-  .hero .mp b{color:var(--gold)}
+  .hero .mp b{color:var(--orange-soft)}
   .score{padding:46px 0 8px}
   .score h2,.arena h2,.segs h2,.rules h2{font-family:'Archivo Black';font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
   .score .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;box-shadow:0 1px 6px rgba(20,20,30,.05)}
   .pcard .photo{width:100%;height:170px;object-fit:cover;display:block;background:var(--card2)}
-  .pcard .body{padding:14px 18px 16px}
-  .pcard.michael{border-color:rgba(252,82,0,.55)}
-  .pcard .medal{position:absolute;top:10px;left:10px;font-family:'Archivo Black';font-size:13px;background:rgba(12,12,14,.8);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+  .pcard.leader{border-color:var(--orange);box-shadow:0 2px 10px rgba(252,82,0,.16)}
+  .pcard .medal{position:absolute;top:10px;left:10px;font-family:'Archivo Black';font-size:13px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+  .pcard .jersey{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;background:var(--orange);color:#fff;border-radius:6px;padding:4px 8px;text-transform:uppercase}
   .pcard .nm{font-family:'Archivo Black';font-size:19px}
+  .pcard .body{padding:14px 18px 16px}
   .pcard .rl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
-  .pcard .pts{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--gold)}
-  .pcard .pts small{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
-  .pcard .sub2{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace}
+  .pcard .tot{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#1c1c20}
+  .pcard.leader .tot{color:var(--orange)}
+  .pcard .gapline{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:2px}
+  .pcard .sub2{font-size:12px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace}
   .rules{padding:36px 0 0}
-  .rules .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;font-size:13.5px;color:var(--muted)}
+  .rules .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;font-size:13.5px;color:var(--muted);box-shadow:0 1px 4px rgba(20,20,30,.04)}
   .rules .box b{color:var(--text)}
-  .rules .box .pt{color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700}
+  .rules .box .pt{color:var(--orange-soft);font-family:'JetBrains Mono',monospace;font-weight:700}
   .arena{padding:46px 0 10px}
-  .arena .mapbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;overflow:hidden}
+  .arena .mapbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;overflow:hidden;box-shadow:0 1px 6px rgba(20,20,30,.05)}
   #bigmap{height:520px;border-radius:10px}
   .arena .cap{font-size:12.5px;color:var(--muted);margin-top:10px;padding:0 6px 4px}
   .segs{padding:46px 0 20px}
-  .seg{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:26px;overflow:hidden}
+  .seg{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:26px;overflow:hidden;box-shadow:0 1px 6px rgba(20,20,30,.05)}
   .seg-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;padding:22px 24px 0}
   .seg-head .num{font-family:'JetBrains Mono',monospace;color:var(--orange);font-size:13px;letter-spacing:.15em}
   .seg-head h3{font-family:'Archivo Black';font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:.01em}
   .seg-head .loc{color:var(--muted);font-size:14px}
   .seg-head a{margin-left:auto;color:var(--orange);font-size:13px;text-decoration:none;border:1px solid rgba(252,82,0,.4);padding:5px 12px;border-radius:999px;white-space:nowrap}
-  .seg-head a:hover{background:rgba(252,82,0,.12)}
+  .seg-head a:hover{background:rgba(252,82,0,.08)}
   .stats{display:flex;flex-wrap:wrap;gap:8px;padding:16px 24px 0}
   .stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:96px}
   .stat .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace}
@@ -84,53 +86,50 @@
   .tbl tr.mrow .rav{border-color:var(--orange)}
   .tbl .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;white-space:nowrap}
   .tbl .date,.tbl .pw{color:var(--muted);font-size:12.5px;white-space:nowrap}
-  .tbl tr.mrow{background:linear-gradient(90deg,rgba(252,82,0,.13),rgba(252,82,0,.03))}
+  .tbl tr.mrow{background:linear-gradient(90deg,rgba(252,82,0,.08),rgba(252,82,0,.02))}
   .tbl tr.mrow .rider::after{content:"THE BENCHMARK";font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--orange);border:1px solid rgba(252,82,0,.5);border-radius:4px;padding:2px 6px;margin-left:9px;vertical-align:1px}
   .pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.08em;border-radius:6px;padding:4px 11px}
-  .pill.yes{color:var(--yes);background:rgba(47,214,123,.12);border:1px solid rgba(47,214,123,.4)}
-  .pill.no{color:var(--no);background:rgba(255,77,94,.10);border:1px solid rgba(255,77,94,.4)}
-  .pill.dns{color:var(--muted);background:rgba(143,141,152,.1);border:1px solid var(--line)}
-  .ptchip{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;border-radius:6px;padding:4px 9px;color:var(--gold);background:rgba(255,207,92,.1);border:1px solid rgba(255,207,92,.35);white-space:nowrap}
-  .ptchip.zero{color:var(--muted);background:transparent;border-color:var(--line)}
+  .pill.yes{color:var(--yes);background:rgba(18,129,63,.09);border:1px solid rgba(18,129,63,.35)}
+  .pill.no{color:var(--no);background:rgba(216,40,62,.07);border:1px solid rgba(216,40,62,.35)}
+  .pill.dns{color:var(--muted);background:rgba(109,109,120,.08);border:1px solid var(--line)}
+  .pill.boned{color:#fff;background:var(--no);border:1px solid var(--no)}
   .gap{font-size:11px;color:var(--muted);display:block;margin-top:3px;font-family:'JetBrains Mono',monospace}
-  footer{border-top:1px solid var(--line);padding:34px 0 46px;color:var(--muted);font-size:13px}
+  footer{border-top:1px solid var(--line);padding:34px 0 46px;color:var(--muted);font-size:13px;background:#fff}
   footer .big{font-family:'Archivo Black';color:var(--text);font-size:16px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
   footer a{color:var(--orange);text-decoration:none}
-  .leaflet-container{background:#101014;font-family:'Archivo',sans-serif}
+  .leaflet-container{background:#e9e9ee;font-family:'Archivo',sans-serif}
 </style>
 </head>
 <body>
 
 <section class="hero"><div class="wrap">
-  <div class="eyebrow">2024michael.com · Orange County, CA</div>
+  <div class="eyebrow">2024michael.com · Southern California</div>
   <h1>Are you stronger<br>than <span class="q">2024 Michael?</span></h1>
-  <p class="sub">Thirteen segments. Four riders. One benchmark: the times <a href="https://www.strava.com/athletes/37685935" style="color:var(--orange-soft);text-decoration:none">Michael Parker</a> laid down in his golden era. Beat the time, take the points.</p>
+  <p class="sub">Fifteen segments. Four riders. One benchmark: the times <a href="https://www.strava.com/athletes/37685935" style="color:var(--orange-soft);text-decoration:none">Michael Parker</a> laid down in his golden era. Lowest total time wins.</p>
   <div class="mp"><span class="dot" id="mpdot">MP</span><span id="mpline">Benchmark holder: <b>2024 Michael</b></span></div>
 </div></section>
 
 <section class="rules"><div class="wrap">
   <h2>The Rules</h2>
   <div class="box">
-    Per segment: if <b>Michael</b> is ahead of everyone, he takes <span class="pt">4 pts</span>.
-    Beat Michael's time and you take <span class="pt">1 pt</span>.
-    Fastest rider on the segment takes <span class="pt">3 pts</span> total.
-    Never attempted? <span class="pt">0 pts</span>. And everyone gets to know about it.
+    Scored like the Tour de France: your times on all fifteen segments add up, and the <b>lowest total time</b> wins the General Classification.
+    Never attempted a segment? You are assessed the <span class="pt">last place time + 10%</span> for it. And everyone gets to know about it.
   </div>
 </div></section>
 
 <section class="score"><div class="wrap">
-  <h2>The Standings · Total Points</h2>
+  <h2>General Classification</h2>
   <div class="grid" id="standings"></div>
 </div></section>
 
 <section class="arena"><div class="wrap">
   <h2>The Battleground</h2>
   <div class="mapbox"><div id="bigmap"></div>
-  <div class="cap">All thirteen segments, plotted from actual Strava GPS data · Huntington Beach → Orange → Irvine → Newport Coast → Laguna → Dana Point</div></div>
+  <div class="cap">All fifteen segments, plotted from actual Strava GPS data · San Diego → Orange County → Glendora</div></div>
 </div></section>
 
 <section class="segs"><div class="wrap">
-  <h2>The Thirteen Segments</h2>
+  <h2>The Fifteen Segments</h2>
   <div id="seglist"></div>
 </div></section>
 
@@ -156,44 +155,39 @@ const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
 document.getElementById("updated").textContent = D.updated;
 if (AV.Michael) document.getElementById("mpdot").innerHTML = '<img src="'+AV.Michael+'" alt="Michael">';
 
+function fmtClock(sec){
+  sec = Math.round(sec);
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  return h ? h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0") : m+":"+String(s).padStart(2,"0");
+}
 function fmtGap(sec, mSec){
-  const d = mSec - sec, s = Math.abs(d), mm = Math.floor(s/60), ss = s%60;
-  const t = (mm ? mm + ":" + String(ss).padStart(2,"0") : ss + "s");
+  const d = mSec - sec;
+  const t = fmtClock(Math.abs(d));
   return d >= 0 ? "beats him by " + t : "behind by " + t;
 }
 
-// ---- points scoring ----
-// Michael fastest overall -> Michael 4 pts.
-// Otherwise: fastest rider 3 pts total; every other rider ahead of Michael 1 pt.
-// Michael DNS counts as "everyone with a time beats him".
-function scoreSegment(sg){
-  const pts = {};
-  const m = sg.riders.find(r=>r.name===MICHAEL);
-  const finishers = sg.riders.filter(r=>r.sec!=null).sort((a,b)=>a.sec-b.sec);
-  sg.riders.forEach(r=>pts[r.name]=0);
-  if (!finishers.length) return pts;
-  const fastest = finishers[0];
-  if (fastest.name===MICHAEL){ pts[MICHAEL]=4; return pts; }
-  finishers.forEach(r=>{
-    if (r.name===MICHAEL) return;
-    const beatsM = (m.sec==null) || (r.sec < m.sec);
-    if (beatsM) pts[r.name] = (r===fastest) ? 3 : 1;
-  });
-  return pts;
-}
+// ---- GC scoring: Tour de France style ----
+// Total time across all segments. DNS on a segment = last place time + 10%.
+const PENALTY = 1.10;
 const totals = {Ali:0, Jake:0, Randee:0, Michael:0};
-const segPts = {};
+const ridden = {Ali:0, Jake:0, Randee:0, Michael:0};
+const penalties = {Ali:0, Jake:0, Randee:0, Michael:0};
+const segPenalty = {};
 D.segs.forEach(sg=>{
-  const p = scoreSegment(sg);
-  segPts[sg.id] = p;
-  for (const k in p) totals[k] += p[k];
+  const finishers = sg.riders.filter(r=>r.sec!=null);
+  const slowest = Math.max(...finishers.map(r=>r.sec));
+  const pen = Math.round(slowest * PENALTY);
+  segPenalty[sg.id] = pen;
+  sg.riders.forEach(r=>{
+    if (r.sec!=null){ totals[r.name]+=r.sec; ridden[r.name]++; }
+    else { totals[r.name]+=pen; penalties[r.name]++; }
+  });
 });
 
 // ---- standings ----
 (function(){
-  const wins = {};
-  D.segs.forEach(sg=>{const p=segPts[sg.id]; for(const k in p){wins[k]=wins[k]||0; if(p[k]>0) wins[k]++;}});
-  const order = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  const order = Object.entries(totals).sort((a,b)=>a[1]-b[1]);
+  const leadTime = order[0][1];
   const medals = ["🥇","🥈","🥉","4th"];
   const box = document.getElementById("standings");
   let html = "";
@@ -201,30 +195,37 @@ D.segs.forEach(sg=>{
     const isM = name===MICHAEL;
     const photo = PH[name] ? '<img class="photo" src="'+PH[name]+'" alt="'+name+'">' :
       (AV[name] ? '<img class="photo" src="'+AV[name]+'" alt="'+name+'">' : '');
-    html += '<div class="pcard'+(isM?' michael':'')+'">'+photo+
+    const gapline = i===0 ? 'race leader' : '+'+fmtClock(t-leadTime);
+    const penTxt = penalties[name] ? ' · '+penalties[name]+' DNS penalt'+(penalties[name]>1?'ies':'y') : '';
+    html += '<div class="pcard'+(i===0?' leader':'')+'">'+photo+
       '<span class="medal">'+medals[i]+'</span>'+
+      (i===0?'<span class="jersey">Yellow Jersey</span>':'')+
       '<div class="body"><div class="nm">'+name+'</div><div class="rl">'+(isM?'Parker · the benchmark':(SURNAMES[name]||''))+'</div>'+
-      '<div class="pts">'+t+'<small>pts</small></div>'+
-      '<div class="sub2">scored on '+(wins[name]||0)+' of '+D.segs.length+' segments</div>'+
+      '<div class="tot">'+fmtClock(t)+'</div>'+
+      '<div class="gapline">'+gapline+'</div>'+
+      '<div class="sub2">'+ridden[name]+' of '+D.segs.length+' segments ridden'+penTxt+'</div>'+
       '</div></div>';
   });
   box.innerHTML = html;
-  const forts = D.segs.filter(sg=>segPts[sg.id][MICHAEL]===4).map(sg=>sg.name);
+  const forts = D.segs.filter(sg=>{
+    const f = sg.riders.filter(r=>r.sec!=null).sort((a,b)=>a.sec-b.sec)[0];
+    return f && f.name===MICHAEL;
+  }).map(sg=>sg.name);
   document.getElementById("mpline").innerHTML = forts.length
     ? 'Benchmark holder: <b>2024 Michael</b> · still undefeated on ' + forts.join(", ")
     : 'Benchmark holder: <b>2024 Michael</b> · every fortress has fallen';
 })();
 
 // ---- map helpers ----
-const TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_OPTS = {attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom: 18};
 function routeMap(divId, pl, interactive){
   const map = L.map(divId, {zoomControl:interactive, dragging:interactive, scrollWheelZoom:false,
     doubleClickZoom:interactive, boxZoom:false, keyboard:false, touchZoom:interactive, attributionControl:false});
   L.tileLayer(TILES, TILE_OPTS).addTo(map);
   const line = L.polyline(pl, {color:"#fc5200", weight:4, opacity:.95}).addTo(map);
-  L.circleMarker(pl[0], {radius:6, color:"#0c0c0e", weight:2, fillColor:"#2fd67b", fillOpacity:1}).addTo(map);
-  L.circleMarker(pl[pl.length-1], {radius:6, color:"#0c0c0e", weight:2, fillColor:"#fc5200", fillOpacity:1}).addTo(map);
+  L.circleMarker(pl[0], {radius:6, color:"#ffffff", weight:2, fillColor:"#12813f", fillOpacity:1}).addTo(map);
+  L.circleMarker(pl[pl.length-1], {radius:6, color:"#ffffff", weight:2, fillColor:"#fc5200", fillOpacity:1}).addTo(map);
   map.fitBounds(line.getBounds(), {padding:[24,24]});
   return map;
 }
@@ -234,26 +235,30 @@ function routeMap(divId, pl, interactive){
   const list = document.getElementById("seglist");
   D.segs.forEach(sg=>{
     const m = sg.riders.find(r=>r.name===MICHAEL);
-    const pts = segPts[sg.id];
+    const finishers = sg.riders.filter(r=>r.sec!=null);
+    const boned = m.sec!=null && finishers.length>1 &&
+      finishers.every(r=>r.name===MICHAEL || r.sec<m.sec);
+    const pen = segPenalty[sg.id];
     let rank = 0;
     const rows = sg.riders.map(r=>{
       const isM = r.name===MICHAEL;
       if (r.sec!=null) rank++;
       let pill;
-      if (isM) pill = r.sec!=null
-        ? '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS MICHAEL</span>'
-        : '<span class="pill dns">DNS</span><span class="gap">Michael never even tried</span>';
-      else if (r.sec==null) pill = '<span class="pill dns">DNS</span><span class="gap">get out there</span>';
+      if (isM) pill = r.sec==null
+        ? '<span class="pill dns">DNS</span><span class="gap">Michael never even tried · assessed '+fmtClock(pen)+'</span>'
+        : (boned
+          ? '<span class="pill boned">MIKE GOT BONED</span><span class="gap">dead last on his own benchmark</span>'
+          : '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS MICHAEL</span>');
+      else if (r.sec==null) pill = '<span class="pill dns">DNS</span><span class="gap">assessed '+fmtClock(pen)+' (last place + 10%)</span>';
       else if (m.sec==null) pill = '<span class="pill yes">YES</span><span class="gap">he never even tried</span>';
       else if (r.sec < m.sec) pill = '<span class="pill yes">YES</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
       else pill = '<span class="pill no">NO</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
       const attTxt = r.attempts!=null ? " · "+r.attempts+" attempts" : "";
-      const chip = pts[r.name]>0 ? '<span class="ptchip">+'+pts[r.name]+' pts</span>' : '<span class="ptchip zero">0</span>';
       return '<tr class="'+(isM?"mrow":"")+'"><td class="rk">'+(r.sec==null?"—":rank)+'</td>'+
         '<td class="rider">'+avImg(r.name,"rav")+r.name+'</td><td class="time">'+r.time+'</td>'+
         '<td class="date">'+r.date+attTxt+'</td>'+
         '<td class="pw">'+(r.watts?r.watts+" W":"—")+'</td>'+
-        '<td>'+chip+'</td><td>'+pill+'</td></tr>';
+        '<td>'+pill+'</td></tr>';
     }).join("");
     const el = document.createElement("div");
     el.className="seg";
@@ -269,9 +274,8 @@ function routeMap(divId, pl, interactive){
      '</div>'+
      '<div class="seg-body">'+
        '<div class="routebox"><div class="segmap" id="map'+sg.id+'"></div>'+
-       '<div class="lg"><span><i style="background:#2fd67b"></i>START</span><span><i style="background:#fc5200"></i>FINISH</span><span style="margin-left:auto">GPS · Strava</span></div></div>'+
-       '<div><div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Pts</th><th>Faster than Michael?</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-       (pts[MICHAEL]===4?'<div style="margin-top:10px;font-size:12.5px;color:var(--orange-soft);font-family:\'JetBrains Mono\',monospace">🏰 Michael\'s fortress. 4 points to the benchmark.</div>':"")+
+       '<div class="lg"><span><i style="background:#12813f"></i>START</span><span><i style="background:#fc5200"></i>FINISH</span><span style="margin-left:auto">GPS · Strava</span></div></div>'+
+       '<div><div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Faster than Michael?</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
        '</div></div>';
     list.appendChild(el);
     routeMap('map'+sg.id, sg.pl, false);
@@ -287,7 +291,7 @@ function routeMap(divId, pl, interactive){
     const line = L.polyline(sg.pl, {color:"#fc5200", weight:4, opacity:.9}).addTo(map);
     line.bindTooltip(sg.num+' · '+sg.name, {sticky:true});
     line.on('click', ()=>{ document.getElementById('map'+sg.id).closest('.seg').scrollIntoView({behavior:'smooth'}); });
-    L.circleMarker(sg.pl[0], {radius:5, color:"#101014", weight:2, fillColor:"#2fd67b", fillOpacity:1}).addTo(map);
+    L.circleMarker(sg.pl[0], {radius:5, color:"#ffffff", weight:2, fillColor:"#12813f", fillOpacity:1}).addTo(map);
     bounds = bounds ? bounds.extend(line.getBounds()) : line.getBounds();
   });
   map.fitBounds(bounds, {padding:[30,30]});
