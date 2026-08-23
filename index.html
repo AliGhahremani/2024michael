@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>2024 Michael — Are You Stronger?</title>
+<title>2024 Michael · Are You Stronger?</title>
 <meta name="description" content="Thirteen segments. Four riders. One benchmark: 2024 Michael.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚴</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--text);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{background:var(--bg);color:var(--text);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   .wrap{max-width:1060px;margin:0 auto;padding:0 20px}
   .hero{position:relative;padding:84px 0 56px;overflow:hidden;
     background:radial-gradient(900px 420px at 75% -10%, rgba(252,82,0,.18), transparent 60%),
@@ -66,7 +66,10 @@
   .stat .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace}
   .stat .v{font-family:'Archivo Black';font-size:17px;margin-top:2px}
   .seg-body{display:grid;grid-template-columns:320px 1fr;gap:22px;padding:20px 24px 24px}
-  @media(max-width:800px){.seg-body{grid-template-columns:1fr}}
+  .seg-body>div{min-width:0}
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  .tblwrap .tbl{min-width:620px}
+  @media(max-width:800px){.seg-body{grid-template-columns:1fr;padding:16px 14px 18px}.seg-head{padding:18px 16px 0}.stats{padding:14px 16px 0}}
   .routebox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column}
   .segmap{height:240px;border-radius:8px}
   .routebox .lg{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;font-family:'JetBrains Mono',monospace;padding:0 4px 2px}
@@ -108,15 +111,15 @@
 <section class="rules"><div class="wrap">
   <h2>The Rules</h2>
   <div class="box">
-    Per segment: if <b>2024 Michael</b> is ahead of everyone, he takes <span class="pt">4 pts</span>.
-    Beat 2024 Michael's time and you take <span class="pt">1 pt</span>.
+    Per segment: if <b>Michael</b> is ahead of everyone, he takes <span class="pt">4 pts</span>.
+    Beat Michael's time and you take <span class="pt">1 pt</span>.
     Fastest rider on the segment takes <span class="pt">3 pts</span> total.
-    Never attempted? <span class="pt">0 pts</span> — and everyone gets to know about it.
+    Never attempted? <span class="pt">0 pts</span>. And everyone gets to know about it.
   </div>
 </div></section>
 
 <section class="score"><div class="wrap">
-  <h2>The Standings — total points</h2>
+  <h2>The Standings · Total Points</h2>
   <div class="grid" id="standings"></div>
 </div></section>
 
@@ -133,8 +136,8 @@
 
 <footer><div class="wrap">
   <div class="big">Are <em style="color:var(--orange)">you</em> stronger than 2024 Michael?</div>
-  <p>Rider times update automatically from the Strava API. Michael's benchmark is frozen forever — that's the point. Some of his PRs date to 2023 or 2025; 2024 Michael claims them all anyway, which is very on brand. Attempt counts shown only where an athlete's own data authorizes it.</p>
-  <p style="margin-top:8px">Last updated: <span id="updated">—</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
+  <p>Rider times update automatically from the Strava API. Michael's benchmark is frozen forever. That's the point. Some of his PRs date to 2023 or 2025; he claims them all anyway, which is very on brand. Attempt counts shown only where an athlete's own data authorizes it.</p>
+  <p style="margin-top:8px">Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
 </div></footer>
 
 <script src="data.js"></script>
@@ -208,8 +211,8 @@ D.segs.forEach(sg=>{
   box.innerHTML = html;
   const forts = D.segs.filter(sg=>segPts[sg.id][MICHAEL]===4).map(sg=>sg.name);
   document.getElementById("mpline").innerHTML = forts.length
-    ? 'Benchmark holder: <b>2024 Michael</b> — still undefeated on ' + forts.join(", ")
-    : 'Benchmark holder: <b>2024 Michael</b> — every fortress has fallen';
+    ? 'Benchmark holder: <b>2024 Michael</b> · still undefeated on ' + forts.join(", ")
+    : 'Benchmark holder: <b>2024 Michael</b> · every fortress has fallen';
 })();
 
 // ---- map helpers ----
@@ -238,8 +241,8 @@ function routeMap(divId, pl, interactive){
       if (r.sec!=null) rank++;
       let pill;
       if (isM) pill = r.sec!=null
-        ? '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS 2024 MICHAEL</span>'
-        : '<span class="pill dns">DNS</span><span class="gap">2024 Michael never even tried</span>';
+        ? '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS MICHAEL</span>'
+        : '<span class="pill dns">DNS</span><span class="gap">Michael never even tried</span>';
       else if (r.sec==null) pill = '<span class="pill dns">DNS</span><span class="gap">get out there</span>';
       else if (m.sec==null) pill = '<span class="pill yes">YES</span><span class="gap">he never even tried</span>';
       else if (r.sec < m.sec) pill = '<span class="pill yes">YES</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
@@ -267,7 +270,7 @@ function routeMap(divId, pl, interactive){
      '<div class="seg-body">'+
        '<div class="routebox"><div class="segmap" id="map'+sg.id+'"></div>'+
        '<div class="lg"><span><i style="background:#2fd67b"></i>START</span><span><i style="background:#fc5200"></i>FINISH</span><span style="margin-left:auto">GPS · Strava</span></div></div>'+
-       '<div><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Pts</th><th>Faster than 2024 Michael?</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+       '<div><div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Pts</th><th>Faster than Michael?</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
        (pts[MICHAEL]===4?'<div style="margin-top:10px;font-size:12.5px;color:var(--orange-soft);font-family:\'JetBrains Mono\',monospace">🏰 Michael\'s fortress. 4 points to the benchmark.</div>':"")+
        '</div></div>';
     list.appendChild(el);
