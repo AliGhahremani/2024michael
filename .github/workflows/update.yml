@@ -1,0 +1,44 @@
+name: Update standings
+
+on:
+  schedule:
+    - cron: "0 15 * * *"   # 15:00 UTC = 8:00 AM PDT (7:00 AM PST in winter)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-standings
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pull latest efforts from Strava
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_ALI: ${{ secrets.STRAVA_REFRESH_ALI }}
+          STRAVA_REFRESH_JAKE: ${{ secrets.STRAVA_REFRESH_JAKE }}
+          STRAVA_REFRESH_RANDEE: ${{ secrets.STRAVA_REFRESH_RANDEE }}
+        run: python scripts/update.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "2024michael-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/state.json data.js
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "Auto-update standings $(date -u +%F)"
+            git push
+          fi
