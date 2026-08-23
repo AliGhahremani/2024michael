@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>2024 Michael · Are You Stronger?</title>
-<meta name="description" content="Fifteen segments. Four riders. One benchmark: 2024 Michael.">
+<meta name="description" content="Fourteen segments. Four riders. One benchmark: 2024 Michael.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚴</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -40,13 +40,19 @@
   .pcard.leader{border-color:var(--orange);box-shadow:0 2px 10px rgba(252,82,0,.16)}
   .pcard .medal{position:absolute;top:10px;left:10px;font-family:'Archivo Black';font-size:13px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
   .pcard .jersey{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;background:var(--orange);color:#fff;border-radius:6px;padding:4px 8px;text-transform:uppercase}
-  .pcard .nm{font-family:'Archivo Black';font-size:19px}
+  .pcard .nm{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;letter-spacing:.02em}
   .pcard .body{padding:14px 18px 16px}
   .pcard .rl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
   .pcard .tot{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#1c1c20}
   .pcard.leader .tot{color:var(--orange)}
   .pcard .gapline{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:2px}
   .pcard .sub2{font-size:12px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace}
+  .pcard .pwr{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .pcard .pwr .pk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px}
+  .pcard .pwr .pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+  .pcard .pwr .pc{background:var(--card2);border:1px solid var(--line);border-radius:7px;padding:5px 2px;text-align:center}
+  .pcard .pwr .pc .pd{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase}
+  .pcard .pwr .pc .pv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;margin-top:1px}
   .rules{padding:36px 0 0}
   .rules .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;font-size:13.5px;color:var(--muted);box-shadow:0 1px 4px rgba(20,20,30,.04)}
   .rules .box b{color:var(--text)}
@@ -81,7 +87,7 @@
   .tbl td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
   .tbl tr:last-child td{border-bottom:none}
   .tbl .rk{font-family:'JetBrains Mono',monospace;color:var(--muted);width:30px}
-  .tbl .rider{font-weight:700;white-space:nowrap}
+  .tbl .rider{font-family:'JetBrains Mono',monospace;font-weight:700;white-space:nowrap}
   .tbl .rav{width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:1.5px solid var(--line)}
   .tbl tr.mrow .rav{border-color:var(--orange)}
   .tbl .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;white-space:nowrap}
@@ -105,14 +111,14 @@
 <section class="hero"><div class="wrap">
   <div class="eyebrow">2024michael.com · Southern California</div>
   <h1>Are you stronger<br>than <span class="q">2024 Michael?</span></h1>
-  <p class="sub">Fifteen segments. Four riders. One benchmark: the times <a href="https://www.strava.com/athletes/37685935" style="color:var(--orange-soft);text-decoration:none">Michael Parker</a> laid down in his golden era. Lowest total time wins.</p>
+  <p class="sub">Fourteen segments. Four riders. One benchmark: the times <a href="https://www.strava.com/athletes/37685935" style="color:var(--orange-soft);text-decoration:none">Michael Parker</a> laid down in his golden era. Lowest total time wins.</p>
   <div class="mp"><span class="dot" id="mpdot">MP</span><span id="mpline">Benchmark holder: <b>2024 Michael</b></span></div>
 </div></section>
 
 <section class="rules"><div class="wrap">
   <h2>The Rules</h2>
   <div class="box">
-    Scored like the Tour de France: your times on all fifteen segments add up, and the <b>lowest total time</b> wins the General Classification.
+    Scored like the Tour de France: your times on all fourteen segments add up, and the <b>lowest total time</b> wins the General Classification.
     Never attempted a segment? You are assessed the <span class="pt">last place time + 10%</span> for it. And everyone gets to know about it.
   </div>
 </div></section>
@@ -125,11 +131,11 @@
 <section class="arena"><div class="wrap">
   <h2>The Battleground</h2>
   <div class="mapbox"><div id="bigmap"></div>
-  <div class="cap">All fifteen segments, plotted from actual Strava GPS data · San Diego → Orange County → Glendora</div></div>
+  <div class="cap">All fourteen segments, plotted from actual Strava GPS data · San Diego → Orange County → Glendora</div></div>
 </div></section>
 
 <section class="segs"><div class="wrap">
-  <h2>The Fifteen Segments</h2>
+  <h2>The Fourteen Segments</h2>
   <div id="seglist"></div>
 </div></section>
 
@@ -152,6 +158,9 @@ const PH = window.PHOTOS || {};
 const avImg = (name, cls) => AV[name] ? '<img class="'+cls+'" src="'+AV[name]+'" alt="'+name+'">' : '';
 const MICHAEL = "Michael";
 const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
+// weights in lbs (placeholders until confirmed)
+const WEIGHT_LBS = {Ali:183, Michael:170, Randee:190, Jake:190};
+const KG = {}; for (const k in WEIGHT_LBS) KG[k] = WEIGHT_LBS[k]/2.20462;
 document.getElementById("updated").textContent = D.updated;
 if (AV.Michael) document.getElementById("mpdot").innerHTML = '<img src="'+AV.Michael+'" alt="Michael">';
 
@@ -184,6 +193,20 @@ D.segs.forEach(sg=>{
   });
 });
 
+// ---- power per kilo (best avg watts from tracked segment efforts) ----
+const PWINDOWS = [["5 min",300],["10 min",600],["20 min",1200],["30 min",1800],["1 hr",3600]];
+const powerRows = {};
+(function(){
+  const efforts = {Ali:[], Jake:[], Randee:[], Michael:[]};
+  D.segs.forEach(sg=>sg.riders.forEach(r=>{ if(r.sec!=null && r.watts) efforts[r.name].push([r.sec, r.watts]); }));
+  for (const name in efforts){
+    powerRows[name] = PWINDOWS.map(([lbl,w])=>{
+      const cand = efforts[name].filter(e=>e[0] >= 0.8*w).map(e=>e[1]);
+      return [lbl, cand.length ? (Math.max(...cand)/KG[name]).toFixed(2) : null];
+    });
+  }
+})();
+
 // ---- standings ----
 (function(){
   const order = Object.entries(totals).sort((a,b)=>a[1]-b[1]);
@@ -204,6 +227,9 @@ D.segs.forEach(sg=>{
       '<div class="tot">'+fmtClock(t)+'</div>'+
       '<div class="gapline">'+gapline+'</div>'+
       '<div class="sub2">'+ridden[name]+' of '+D.segs.length+' segments ridden'+penTxt+'</div>'+
+      '<div class="pwr"><span class="pk">Power · W/kg · best tracked efforts</span><div class="pgrid">'+
+        powerRows[name].map(([lbl,v])=>'<div class="pc"><div class="pd">'+lbl+'</div><div class="pv">'+(v||'–')+'</div></div>').join('')+
+      '</div></div>'+
       '</div></div>';
   });
   box.innerHTML = html;
@@ -236,19 +262,20 @@ function routeMap(divId, pl, interactive){
   D.segs.forEach(sg=>{
     const m = sg.riders.find(r=>r.name===MICHAEL);
     const finishers = sg.riders.filter(r=>r.sec!=null);
-    const boned = m.sec!=null && finishers.length>1 &&
-      finishers.every(r=>r.name===MICHAEL || r.sec<m.sec);
+    const worstSec = finishers.length>1 ? Math.max(...finishers.map(r=>r.sec)) : null;
     const pen = segPenalty[sg.id];
     let rank = 0;
     const rows = sg.riders.map(r=>{
       const isM = r.name===MICHAEL;
       if (r.sec!=null) rank++;
+      const isBoned = worstSec!=null && r.sec===worstSec;
+      const bonedName = (r.name===MICHAEL?'MIKE':r.name.toUpperCase())+' GOT BONED';
       let pill;
-      if (isM) pill = r.sec==null
+      if (isBoned) pill = '<span class="pill boned">'+bonedName+'</span><span class="gap">'+
+        (isM ? 'dead last on his own benchmark' : 'dead last · '+(m.sec==null?'at least he beat nobody':fmtGap(r.sec,m.sec)))+'</span>';
+      else if (isM) pill = r.sec==null
         ? '<span class="pill dns">DNS</span><span class="gap">Michael never even tried · assessed '+fmtClock(pen)+'</span>'
-        : (boned
-          ? '<span class="pill boned">MIKE GOT BONED</span><span class="gap">dead last on his own benchmark</span>'
-          : '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS MICHAEL</span>');
+        : '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS MICHAEL</span>';
       else if (r.sec==null) pill = '<span class="pill dns">DNS</span><span class="gap">assessed '+fmtClock(pen)+' (last place + 10%)</span>';
       else if (m.sec==null) pill = '<span class="pill yes">YES</span><span class="gap">he never even tried</span>';
       else if (r.sec < m.sec) pill = '<span class="pill yes">YES</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
