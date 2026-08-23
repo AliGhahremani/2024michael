@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2024 Michael — Are You Stronger?</title>
+<meta name="description" content="Six segments. Four riders. One benchmark: 2024 Michael.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚴</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c0e; --card:#151519; --card2:#1b1b21; --line:#26262e;
+    --text:#f2f0ec; --muted:#8f8d98; --orange:#fc5200; --orange-soft:#ff7a38;
+    --yes:#2fd67b; --no:#ff4d5e; --gold:#ffcf5c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+  .hero{position:relative;padding:84px 0 56px;overflow:hidden;
+    background:radial-gradient(900px 420px at 75% -10%, rgba(252,82,0,.18), transparent 60%),
+      radial-gradient(600px 300px at 10% 0%, rgba(252,82,0,.07), transparent 60%);
+    border-bottom:1px solid var(--line);}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.28em;color:var(--orange);text-transform:uppercase;margin-bottom:18px}
+  h1{font-family:'Archivo Black','Archivo',sans-serif;font-size:clamp(38px,7vw,76px);line-height:.98;text-transform:uppercase;letter-spacing:-.01em}
+  h1 .q{color:var(--orange)}
+  .hero p.sub{margin-top:20px;max-width:560px;color:var(--muted);font-size:17px}
+  .hero .mp{margin-top:26px;display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 20px 9px 12px;font-size:14px}
+  .hero .mp .dot{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ffb38a);display:flex;align-items:center;justify-content:center;font-family:'Archivo Black';font-size:13px;color:#1a0d05}
+  .hero .mp b{color:var(--gold)}
+  .score{padding:46px 0 8px}
+  .score h2,.arena h2,.segs h2{font-family:'Archivo Black';font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  .score .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;position:relative}
+  .pcard.michael{border-color:rgba(252,82,0,.55);background:linear-gradient(180deg,rgba(252,82,0,.10),var(--card) 70%)}
+  .pcard .av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--line);display:block;margin-bottom:10px}
+  .pcard.michael .av{border-color:var(--orange)}
+  .tbl .rav{width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:1.5px solid var(--line)}
+  .tbl tr.mrow .rav{border-color:var(--orange)}
+  .pcard .nm{font-family:'Archivo Black';font-size:19px}
+  .pcard .rl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+  .pcard .tally{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700}
+  .pcard .tally small{font-size:12px;color:var(--muted);font-weight:400;display:block;margin-top:2px;letter-spacing:.05em}
+  .pcard .tally .w{color:var(--yes)} .pcard .tally .l{color:var(--no)}
+  .pcard.michael .tally{color:var(--orange-soft);font-size:15px;line-height:1.4;font-weight:400}
+  .arena{padding:46px 0 10px}
+  .arena .mapbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;overflow:hidden}
+  .arena svg{display:block;width:100%;height:auto}
+  .arena .cap{font-size:12.5px;color:var(--muted);margin-top:10px;padding:0 6px 4px}
+  .segs{padding:46px 0 20px}
+  .seg{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:26px;overflow:hidden}
+  .seg-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;padding:22px 24px 0}
+  .seg-head .num{font-family:'JetBrains Mono',monospace;color:var(--orange);font-size:13px;letter-spacing:.15em}
+  .seg-head h3{font-family:'Archivo Black';font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:.01em}
+  .seg-head .loc{color:var(--muted);font-size:14px}
+  .seg-head a{margin-left:auto;color:var(--orange);font-size:13px;text-decoration:none;border:1px solid rgba(252,82,0,.4);padding:5px 12px;border-radius:999px;white-space:nowrap}
+  .seg-head a:hover{background:rgba(252,82,0,.12)}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;padding:16px 24px 0}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:96px}
+  .stat .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .stat .v{font-family:'Archivo Black';font-size:17px;margin-top:2px}
+  .seg-body{display:grid;grid-template-columns:300px 1fr;gap:22px;padding:20px 24px 24px}
+  @media(max-width:760px){.seg-body{grid-template-columns:1fr}}
+  .routebox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
+  .routebox svg{width:100%;height:auto;flex:1}
+  .routebox .lg{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;font-family:'JetBrains Mono',monospace}
+  .routebox .lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+  .tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+  .tbl th{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-weight:400}
+  .tbl td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl .rk{font-family:'JetBrains Mono',monospace;color:var(--muted);width:30px}
+  .tbl .rider{font-weight:700;white-space:nowrap}
+  .tbl .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;white-space:nowrap}
+  .tbl .date,.tbl .pw{color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .tbl tr.mrow{background:linear-gradient(90deg,rgba(252,82,0,.13),rgba(252,82,0,.03))}
+  .tbl tr.mrow .rider::after{content:"THE BENCHMARK";font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--orange);border:1px solid rgba(252,82,0,.5);border-radius:4px;padding:2px 6px;margin-left:9px;vertical-align:1px}
+  .pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.08em;border-radius:6px;padding:4px 11px}
+  .pill.yes{color:var(--yes);background:rgba(47,214,123,.12);border:1px solid rgba(47,214,123,.4)}
+  .pill.no{color:var(--no);background:rgba(255,77,94,.10);border:1px solid rgba(255,77,94,.4)}
+  .pill.dns{color:var(--muted);background:rgba(143,141,152,.1);border:1px solid var(--line)}
+  .gap{font-size:11px;color:var(--muted);display:block;margin-top:3px;font-family:'JetBrains Mono',monospace}
+  footer{border-top:1px solid var(--line);padding:34px 0 46px;color:var(--muted);font-size:13px}
+  footer .big{font-family:'Archivo Black';color:var(--text);font-size:16px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  footer a{color:var(--orange);text-decoration:none}
+</style>
+</head>
+<body>
+
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">2024michael.com · Orange County, CA</div>
+  <h1>Are you stronger<br>than <span class="q">2024 Michael?</span></h1>
+  <p class="sub">Six segments. Four riders. One benchmark: the times <a href="https://www.strava.com/athletes/37685935" style="color:var(--orange-soft);text-decoration:none">Michael Parker</a> laid down in his golden era. Beat the time, earn the YES.</p>
+  <div class="mp"><span class="dot">MP</span><span id="mpline">Benchmark holder: <b>2024 Michael</b></span></div>
+</div></section>
+
+<section class="score"><div class="wrap">
+  <h2>The Standings — wins vs 2024 Michael</h2>
+  <div class="grid" id="standings"></div>
+</div></section>
+
+<section class="arena"><div class="wrap">
+  <h2>The Battleground</h2>
+  <div class="mapbox"><svg id="arena" viewBox="0 0 1000 640" role="img" aria-label="Map of the six segments across Orange County"></svg>
+  <div class="cap">Route positions plotted from actual Strava GPS data · Huntington Beach → Orange → Irvine → Newport Coast</div></div>
+</div></section>
+
+<section class="segs"><div class="wrap">
+  <h2>The Six Segments</h2>
+  <div id="seglist"></div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="big">Are <em style="color:var(--orange)">you</em> stronger than 2024 Michael?</div>
+  <p>Rider times update automatically from the Strava API. Michael's benchmark is frozen forever — that's the point. * Michael's PR on Quail Hill dates to 2023 and on Bommer Canyon to 2025; 2024 Michael gets credit anyway. Attempt counts shown only where an athlete's own data authorizes it.</p>
+  <p style="margin-top:8px">Last updated: <span id="updated">—</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
+</div></footer>
+
+<script src="data.js"></script>
+<script src="avatars.js"></script>
+<script>
+const D = window.SITE_DATA;
+const AV = window.AVATARS || {};
+const avImg = (name, cls) => AV[name] ? '<img class="'+cls+'" src="'+AV[name]+'" alt="'+name+'">' : '';
+const MICHAEL = "Michael";
+const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
+document.getElementById("updated").textContent = D.updated;
+
+function fmtGap(sec, mSec){
+  const d = mSec - sec, s = Math.abs(d), mm = Math.floor(s/60), ss = s%60;
+  const t = (mm ? mm + ":" + String(ss).padStart(2,"0") : ss + "s");
+  return d >= 0 ? "beats him by " + t : "behind by " + t;
+}
+function project(points, W, H, pad){
+  const k = Math.cos(33.68*Math.PI/180);
+  const xs = points.map(p=>p[1]*k), ys = points.map(p=>p[0]);
+  const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+  const sw=maxX-minX||1e-6, sh=maxY-minY||1e-6;
+  const sc=Math.min((W-2*pad)/sw,(H-2*pad)/sh);
+  const ox=(W-sw*sc)/2, oy=(H-sh*sc)/2;
+  return points.map(p=>[ox+(p[1]*k-minX)*sc, H-(oy+(p[0]-minY)*sc)]);
+}
+const path = pts => pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+
+// ---- standings (computed) ----
+(function(){
+  const tally = {};
+  D.segs.forEach(sg=>{
+    const m = sg.riders.find(r=>r.name===MICHAEL);
+    sg.riders.forEach(r=>{
+      if (r.name===MICHAEL) return;
+      tally[r.name] = tally[r.name] || {w:0,l:0,dns:0};
+      if (r.sec==null) tally[r.name].dns++;
+      else if (r.sec < m.sec) tally[r.name].w++;
+      else tally[r.name].l++;
+    });
+  });
+  const order = Object.entries(tally).sort((a,b)=>b[1].w-a[1].w || a[1].l-b[1].l);
+  const box = document.getElementById("standings");
+  let html = "";
+  order.forEach(([name,t])=>{
+    let small = "";
+    if (t.dns) small = "+" + t.dns + " never attempted 👀";
+    else if (t.l===0) small = "clean sweep. retire him.";
+    else if (t.l===1) small = "one segment stands";
+    else if (t.w===t.l) small = "dead even. awkward.";
+    else if (t.w<t.l) small = "2024 Michael sends his regards";
+    else small = "closing in";
+    html += '<div class="pcard">'+avImg(name,"av")+'<div class="nm">'+name+'</div><div class="rl">'+(SURNAMES[name]||"")+'</div>'+
+      '<div class="tally"><span class="w">'+t.w+'</span>–<span class="l">'+t.l+'</span><small>'+small+'</small></div></div>';
+  });
+  html += '<div class="pcard michael">'+avImg("Michael","av")+'<div class="nm">Michael</div><div class="rl">Parker · the benchmark</div>'+
+    '<div class="tally">You don\'t beat 2024 Michael.<br>You survive him.</div></div>';
+  box.innerHTML = html;
+  // fortress line in hero
+  const forts = D.segs.filter(sg=>{
+    const m = sg.riders.find(r=>r.name===MICHAEL);
+    return sg.riders.every(r=>r.name===MICHAEL || r.sec==null || r.sec>=m.sec);
+  }).map(sg=>sg.name);
+  document.getElementById("mpline").innerHTML = forts.length
+    ? 'Benchmark holder: <b>2024 Michael</b> — still undefeated on ' + forts.join(", ")
+    : 'Benchmark holder: <b>2024 Michael</b> — every fortress has fallen';
+})();
+
+// ---- segment cards ----
+(function(){
+  const list = document.getElementById("seglist");
+  D.segs.forEach(sg=>{
+    const m = sg.riders.find(r=>r.name===MICHAEL);
+    const pts = project(sg.pl, 276, 208, 20);
+    const a=pts[0], b=pts[pts.length-1];
+    let rank = 0;
+    const rows = sg.riders.map(r=>{
+      const isM = r.name===MICHAEL;
+      if (r.sec!=null) rank++;
+      let pill;
+      if (isM) pill = '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--orange)">HE IS 2024 MICHAEL</span>';
+      else if (r.sec==null) pill = '<span class="pill dns">DNS</span><span class="gap">get out there</span>';
+      else if (r.sec < m.sec) pill = '<span class="pill yes">YES</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
+      else pill = '<span class="pill no">NO</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
+      const attTxt = r.attempts!=null ? " · "+r.attempts+" attempts" : "";
+      return '<tr class="'+(isM?"mrow":"")+'"><td class="rk">'+(r.sec==null?"—":rank)+'</td>'+
+        '<td class="rider">'+avImg(r.name,"rav")+r.name+'</td><td class="time">'+r.time+'</td>'+
+        '<td class="date">'+r.date+attTxt+'</td>'+
+        '<td class="pw">'+(r.watts?r.watts+" W":"—")+'</td><td>'+pill+'</td></tr>';
+    }).join("");
+    const allNo = sg.riders.every(r=>r.name===MICHAEL || r.sec==null || r.sec>=m.sec);
+    const el = document.createElement("div");
+    el.className="seg";
+    el.innerHTML =
+     '<div class="seg-head"><span class="num">'+sg.num+'</span><h3>'+sg.name+'</h3>'+
+     '<span class="loc">'+sg.loc+'</span><a href="https://www.strava.com/segments/'+sg.id+'" target="_blank" rel="noopener">View on Strava ↗</a></div>'+
+     '<div class="stats">'+
+       '<div class="stat"><div class="k">Distance</div><div class="v">'+sg.dist+'</div></div>'+
+       '<div class="stat"><div class="k">Elev Gain</div><div class="v">'+sg.gain+'</div></div>'+
+       '<div class="stat"><div class="k">Avg Grade</div><div class="v">'+sg.grade+'</div></div>'+
+       '<div class="stat"><div class="k">Climb Cat</div><div class="v">'+sg.cat+'</div></div>'+
+       '<div class="stat"><div class="k">Segment Traffic</div><div class="v" style="font-size:13px;padding-top:3px">'+sg.att+'</div></div>'+
+     '</div>'+
+     '<div class="seg-body">'+
+       '<div class="routebox"><svg viewBox="0 0 276 208">'+
+         '<defs><linearGradient id="g'+sg.id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2fd67b"/><stop offset="1" stop-color="#fc5200"/></linearGradient></defs>'+
+         '<path d="'+path(pts)+'" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>'+
+         '<path d="'+path(pts)+'" fill="none" stroke="url(#g'+sg.id+')" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'+
+         '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="5.5" fill="#2fd67b" stroke="#0c0c0e" stroke-width="2"/>'+
+         '<circle cx="'+b[0]+'" cy="'+b[1]+'" r="5.5" fill="#fc5200" stroke="#0c0c0e" stroke-width="2"/>'+
+       '</svg>'+
+       '<div class="lg"><span><i style="background:#2fd67b"></i>START</span><span><i style="background:#fc5200"></i>FINISH</span><span style="margin-left:auto">GPS · Strava</span></div></div>'+
+       '<div><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Faster than 2024 Michael'+(sg.star||"")+'?</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+       (allNo?'<div style="margin-top:10px;font-size:12.5px;color:var(--orange-soft);font-family:\'JetBrains Mono\',monospace">🏰 Michael\'s fortress. Nobody has taken it.</div>':"")+
+       '</div></div>';
+    list.appendChild(el);
+  });
+})();
+
+// ---- arena overview ----
+(function(){
+  const W=1000,H=640,pad=90;
+  const all = D.segs.flatMap(s=>s.pl);
+  const k=Math.cos(33.68*Math.PI/180);
+  const xs=all.map(p=>p[1]*k), ys=all.map(p=>p[0]);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const sc=Math.min((W-2*pad)/(maxX-minX),(H-2*pad)/(maxY-minY));
+  const ox=(W-(maxX-minX)*sc)/2, oy=(H-(maxY-minY)*sc)/2;
+  const P=p=>[ox+(p[1]*k-minX)*sc, H-(oy+(p[0]-minY)*sc)];
+  const svg=document.getElementById("arena");
+  let inner='<rect width="'+W+'" height="'+H+'" fill="#101014"/>';
+  for(let x=0;x<=W;x+=100) inner+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="'+H+'" stroke="#1c1c22" stroke-width="1"/>';
+  for(let y=0;y<=H;y+=100) inner+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="#1c1c22" stroke-width="1"/>';
+  inner+='<path d="M 0 430 Q 250 470 480 560 Q 700 640 1000 620 L 1000 640 L 0 640 Z" fill="#12202a" opacity=".9"/>';
+  inner+='<text x="150" y="600" fill="#2e4a5c" font-size="26" font-family="Archivo Black, sans-serif" letter-spacing="6" opacity=".8">PACIFIC OCEAN</text>';
+  const lblOff = {649404:[-235,-16],7855869:[12,4],913750:[14,8],618874:[0,-16],633514:[14,0],706732:[-4,22]};
+  D.segs.forEach(sg=>{
+    const pts=sg.pl.map(P);
+    inner+='<path d="'+path(pts)+'" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
+    inner+='<path d="'+path(pts)+'" fill="none" stroke="#fc5200" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    const mid=pts[Math.floor(pts.length/2)], o=lblOff[sg.id]||[10,-10];
+    inner+='<circle cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="5" fill="#2fd67b" stroke="#101014" stroke-width="2"/>';
+    inner+='<text x="'+(mid[0]+o[0])+'" y="'+(mid[1]+o[1])+'" fill="#f2f0ec" font-size="17" font-weight="700" font-family="Archivo, sans-serif" paint-order="stroke" stroke="#101014" stroke-width="5">'+sg.num+' · '+(sg.name.length>26?sg.name.slice(0,24)+"…":sg.name)+'</text>';
+  });
+  const cities=[["Huntington Beach",33.6595,-118.0008],["Irvine",33.6846,-117.7857],["Orange",33.7878,-117.8531],["Newport Beach",33.6189,-117.9298]];
+  cities.forEach(c=>{const p=P([c[1],c[2]]);inner+='<text x="'+p[0]+'" y="'+p[1]+'" fill="#5a5866" font-size="15" font-family="JetBrains Mono, monospace" letter-spacing="2" text-anchor="middle">'+c[0].toUpperCase()+'</text>';});
+  inner+='<g transform="translate(945,50)"><circle r="22" fill="none" stroke="#2a2a32"/><path d="M 0 -14 L 5 8 L 0 4 L -5 8 Z" fill="#fc5200"/><text y="-30" text-anchor="middle" fill="#8f8d98" font-size="13" font-family="JetBrains Mono, monospace">N</text></g>';
+  svg.innerHTML=inner;
+})();
+</script>
+</body>
+</html>
