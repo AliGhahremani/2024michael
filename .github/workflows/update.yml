@@ -29,6 +29,7 @@ jobs:
           STRAVA_REFRESH_ALI: ${{ secrets.STRAVA_REFRESH_ALI }}
           STRAVA_REFRESH_JAKE: ${{ secrets.STRAVA_REFRESH_JAKE }}
           STRAVA_REFRESH_RANDEE: ${{ secrets.STRAVA_REFRESH_RANDEE }}
+          STRAVA_REFRESH_MICHAEL: ${{ secrets.STRAVA_REFRESH_MICHAEL }}
         run: python scripts/update.py
 
       - name: Commit and push if changed
