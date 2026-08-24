@@ -18,6 +18,7 @@ API = "https://www.strava.com/api/v3"
 _meta = json.load(open(META_PATH))
 TRACKED = {s["id"] for s in _meta["segments"]}
 OVERLAP = 3 * 86400  # re-scan 3 days back to catch late uploads
+PWINDOWS = [300, 600, 1200, 1800, 3600]  # power best-effort windows (sec)
 
 def http(url, data=None, token=None):
     req = urllib.request.Request(url, data=data)
@@ -43,6 +44,34 @@ def fmt_time(sec):
 def fmt_date(iso):
     d = datetime.datetime.fromisoformat(iso.replace("Z", "+00:00"))
     return d.strftime("%b %-d, %Y") if os.name != "nt" else d.strftime("%b %d, %Y").replace(" 0", " ")
+
+def best_window_avgs(times, watts, windows):
+    """Best average watts for each window, from time/watts streams."""
+    if not times or not watts or len(times) != len(watts):
+        return {}
+    dur = int(times[-1])
+    if dur <= 0:
+        return {}
+    series = [0] * (dur + 1)
+    last, ptr = 0, 0
+    for t in range(dur + 1):
+        while ptr < len(times) and times[ptr] <= t:
+            if watts[ptr] is not None:
+                last = watts[ptr]
+            ptr += 1
+        series[t] = last
+    prefix = [0]
+    for v in series:
+        prefix.append(prefix[-1] + v)
+    n = len(series)
+    out = {}
+    for w in windows:
+        if n < w:
+            continue
+        best = max(prefix[i + w] - prefix[i] for i in range(n - w + 1))
+        if best > 0:
+            out[w] = round(best / w)
+    return out
 
 def main():
     cid = os.environ["STRAVA_CLIENT_ID"]
@@ -109,6 +138,25 @@ def main():
                     }
                     changed = True
                     summary.append(f"{ath['display']} new PR on segment {sid}: {fmt_time(sec)}")
+
+            # ---- power bests: real meters only, no e-bikes, no Peloton ----
+            try:
+                dev = str(detail.get("device_name") or "").lower()
+                if (detail.get("device_watts") and detail.get("type") != "EBikeRide"
+                        and "peloton" not in dev):
+                    sj = http(f"{API}/activities/{a['id']}/streams?keys=time,watts&key_by_type=true", token=access)
+                    tt = (sj.get("time") or {}).get("data") or []
+                    ww = (sj.get("watts") or {}).get("data") or []
+                    bests = best_window_avgs(tt, ww, PWINDOWS)
+                    pw = ath.setdefault("power", {})
+                    for w, val in bests.items():
+                        k = str(w)
+                        if val > int(pw.get(k) or 0):
+                            pw[k] = val
+                            changed = True
+                            summary.append(f"{ath['display']} new {w//60} min power: {val} W")
+            except Exception as e:
+                print(f"[{key}] power calc failed for {a['id']}: {e}", file=sys.stderr)
             time.sleep(1)  # be polite to rate limits
 
         if ath.get("last_epoch") != now:
@@ -147,7 +195,14 @@ def main():
         seg_out["pl"] = meta["polylines"][sid_s]
         segs_out.append(seg_out)
 
-    payload = {"updated": state["updated"], "segs": segs_out}
+    power_out = {}
+    for key, ath in state["athletes"].items():
+        if ath.get("power"):
+            power_out[ath["display"]] = ath["power"]
+    if state.get("michael_power"):
+        power_out["Michael"] = state["michael_power"]
+
+    payload = {"updated": state["updated"], "segs": segs_out, "power": power_out}
     with open(DATA_JS_PATH, "w") as f:
         f.write("window.SITE_DATA = ")
         json.dump(payload, f, separators=(",", ":"))
