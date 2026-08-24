@@ -2,10 +2,11 @@
 """Daily updater for 2024michael.com.
 
 For each athlete with a refresh token, pulls activities since their last check,
-scans segment_efforts for the six tracked segments, updates rolling PRs and
+scans segment_efforts for the tracked segments, updates rolling PRs and
 attempt counts in data/state.json, then regenerates data.js for the site.
 
-Michael's benchmark times are frozen (michael_frozen in state.json) - by design.
+All four riders (Ali, Jake, Randee, Michael) are tracked live. The "2024 Michael"
+branding on the site is a gimmick, not a frozen data set.
 """
 import json, os, sys, time, datetime, urllib.request, urllib.parse
 
@@ -80,6 +81,7 @@ def main():
         "ali": os.environ.get("STRAVA_REFRESH_ALI", ""),
         "jake": os.environ.get("STRAVA_REFRESH_JAKE", ""),
         "randee": os.environ.get("STRAVA_REFRESH_RANDEE", ""),
+        "michael": os.environ.get("STRAVA_REFRESH_MICHAEL", ""),
     }
 
     state = json.load(open(STATE_PATH))
@@ -182,13 +184,6 @@ def main():
             else:
                 riders.append({"name": ath["display"], "sec": None, "time": "—",
                                "date": "never attempted", "watts": None, "attempts": att})
-        m = state["michael_frozen"].get(sid_s)
-        if m:
-            riders.append({"name": "Michael", "sec": m["sec"], "time": m["time"],
-                           "date": m["date"], "watts": m["watts"], "attempts": None})
-        else:
-            riders.append({"name": "Michael", "sec": None, "time": "—",
-                           "date": "never attempted", "watts": None, "attempts": None})
         riders.sort(key=lambda r: (r["sec"] is None, r["sec"] if r["sec"] is not None else 0))
         seg_out = dict(seg)
         seg_out["riders"] = riders
@@ -199,9 +194,6 @@ def main():
     for key, ath in state["athletes"].items():
         if ath.get("power"):
             power_out[ath["display"]] = ath["power"]
-    if state.get("michael_power"):
-        power_out["Michael"] = state["michael_power"]
-
     payload = {"updated": state["updated"], "segs": segs_out, "power": power_out}
     with open(DATA_JS_PATH, "w") as f:
         f.write("window.SITE_DATA = ")
