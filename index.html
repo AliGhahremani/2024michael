@@ -216,7 +216,9 @@ D.segs.forEach(sg=>{
 // these private per account, so each rider sends their own numbers).
 // Fallback: best avg watts from tracked segment efforts.
 const POWER_W = {
-  Ali: {"5 min":328, "10 min":301, "20 min":260, "30 min":233, "1 hr":220}
+  Ali: {"5 min":328, "10 min":301, "20 min":260, "30 min":233, "1 hr":220},
+  Jake: {"5 min":370, "10 min":323, "20 min":275, "30 min":254, "1 hr":219},
+  Randee: {"5 min":302, "10 min":256, "20 min":228, "30 min":223, "1 hr":202}
 };
 const PWINDOWS = [["5 min",300],["10 min",600],["20 min",1200],["30 min",1800],["1 hr",3600]];
 const powerRows = {};
