@@ -212,15 +212,27 @@ D.segs.forEach(sg=>{
 });
 
 // ---- power per kilo ----
-// Real Strava best-effort watts where the rider has shared them (Strava keeps
-// these private per account, so each rider sends their own numbers).
-// Fallback: best avg watts from tracked segment efforts.
-const POWER_W = {
-  Ali: {"5 min":328, "10 min":301, "20 min":260, "30 min":233, "1 hr":220},
-  Jake: {"5 min":354, "10 min":302, "20 min":265, "30 min":244, "1 hr":218},
-  Randee: {"5 min":315, "10 min":280, "20 min":241, "30 min":222, "1 hr":201},
-  Michael: {"5 min":293, "10 min":264, "20 min":255, "30 min":243, "1 hr":228}
+// Official athlete-confirmed baselines; the daily updater raises them from
+// real-meter rides via the Strava API (no e-bikes, no Peloton, no estimates).
+const OFFICIAL_W = {
+  Ali: {"300":328, "600":301, "1200":260, "1800":233, "3600":220},
+  Jake: {"300":354, "600":302, "1200":265, "1800":244, "3600":218},
+  Randee: {"300":315, "600":280, "1200":241, "1800":222, "3600":201},
+  Michael: {"300":293, "600":264, "1200":255, "1800":243, "3600":228}
 };
+const DUR_LBL = {"300":"5 min", "600":"10 min", "1200":"20 min", "1800":"30 min", "3600":"1 hr"};
+const POWER_W = {};
+for (const name in OFFICIAL_W){
+  POWER_W[name] = {};
+  for (const k in OFFICIAL_W[name]) POWER_W[name][DUR_LBL[k]] = OFFICIAL_W[name][k];
+}
+if (D.power) for (const name in D.power){
+  POWER_W[name] = POWER_W[name] || {};
+  for (const k in D.power[name]){
+    const l = DUR_LBL[k], v = D.power[name][k];
+    if (l && v > (POWER_W[name][l] || 0)) POWER_W[name][l] = v;
+  }
+}
 const PWINDOWS = [["5 min",300],["10 min",600],["20 min",1200],["30 min",1800],["1 hr",3600]];
 const powerRows = {};
 (function(){
