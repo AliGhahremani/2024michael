@@ -163,7 +163,7 @@ const avImg = (name, cls) => AV[name] ? '<img class="'+cls+'" src="'+AV[name]+'"
 const MICHAEL = "Michael";
 const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
 // weights in lbs (placeholders until confirmed)
-const WEIGHT_LBS = {Ali:183, Michael:170, Randee:190, Jake:190};
+const WEIGHT_LBS = {Ali:183, Michael:170, Randee:185, Jake:190};
 const KG = {}; for (const k in WEIGHT_LBS) KG[k] = WEIGHT_LBS[k]/2.20462;
 document.getElementById("updated").textContent = D.updated;
 if (AV.Michael) document.getElementById("mpdot").innerHTML = '<img src="'+AV.Michael+'" alt="Michael">';
@@ -218,7 +218,8 @@ D.segs.forEach(sg=>{
 const POWER_W = {
   Ali: {"5 min":328, "10 min":301, "20 min":260, "30 min":233, "1 hr":220},
   Jake: {"5 min":370, "10 min":323, "20 min":275, "30 min":254, "1 hr":219},
-  Randee: {"5 min":302, "10 min":256, "20 min":228, "30 min":223, "1 hr":202}
+  Randee: {"5 min":302, "10 min":256, "20 min":228, "30 min":223, "1 hr":202},
+  Michael: {"5 min":413, "10 min":374, "20 min":364, "30 min":353, "1 hr":228}
 };
 const PWINDOWS = [["5 min",300],["10 min",600],["20 min",1200],["30 min",1800],["1 hr",3600]];
 const powerRows = {};
