@@ -52,10 +52,14 @@ The cards show W/kg for 5 / 10 / 20 / 30 / 60 minutes.
 
 Hard rule from Ali: **only real power meter data. Never Strava's estimates.**
 
-- No e-bike rides (`type == "EBikeRide"`).
-- No Peloton (`device_name` containing "peloton").
 - Requires `device_watts` true on the activity.
 - Zwift and regular outdoor rides are fine as long as there is a power meter.
+
+**Separate and broader hard rule, added 2026-08-25: e-bike and Peloton rides do
+not count for ANYTHING.** Not power, not segment times, not KOMs. `update.py`
+skips the entire activity after fetching it. This closes a hole where an e-bike
+ride could not pollute a W/kg number but could still set a segment PR and take a
+crown. Zwift is explicitly fine.
 
 The current baseline numbers in `OFFICIAL_W` in `index.html` were supplied by the
 riders themselves from their Strava best-efforts pages. They are authoritative.
@@ -111,11 +115,14 @@ It sleeps 1s per activity to stay inside Strava's rate limits.
 ## Secrets
 
 Repo Settings -> Secrets and variables -> Actions. Values are never stored here.
+Status column verified against the live settings page on 2026-08-25. An earlier
+version of this table wrongly claimed the client secret was set. Check the page,
+do not trust the table.
 
 | Secret | Status |
 |---|---|
 | `STRAVA_CLIENT_ID` | set (274192) |
-| `STRAVA_CLIENT_SECRET` | set |
+| `STRAVA_CLIENT_SECRET` | **pending** |
 | `ACTIONS_PAT` | **pending** |
 | `STRAVA_REFRESH_ALI` | **pending** |
 | `STRAVA_REFRESH_JAKE` | **pending** |

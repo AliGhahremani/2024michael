@@ -36,6 +36,15 @@ Fourteen tracked segments, scored like a Tour de France General Classification.
 - **KOM crown**: fastest rider on a segment.
 - **GOT BONED**: last place on a segment. Applies to whoever is slowest, not just Michael.
 
+## What counts as a ride
+
+E-bike rides and Peloton rides do not count for anything. Not segment times, not
+power, not KOMs. `update.py` skips the whole activity. This is deliberate: an
+e-bike will demolish a segment, and a Peloton has no business on a GC.
+
+Zwift and other smart trainer rides arrive as `VirtualRide` with `device_watts`
+and do count, indoors or out.
+
 ## Power rules
 
 Cards show W/kg at 5, 10, 20, 30 and 60 minutes.
@@ -43,8 +52,7 @@ Cards show W/kg at 5, 10, 20, 30 and 60 minutes.
 Only real power meter data is ever published. Never Strava's estimates.
 
 - Requires `device_watts` on the activity.
-- No e-bike rides (`type == "EBikeRide"`).
-- No Peloton (`device_name` containing "peloton").
+- E-bike and Peloton already excluded upstream, per the section above.
 - Zwift and outdoor rides are fine as long as a power meter was recording.
 
 Baseline numbers in `OFFICIAL_W` came from the riders' own Strava best-efforts pages
@@ -106,9 +114,12 @@ only. Everyone else shows a dash. A full history backfill is possible but not wr
 ## Remaining setup
 
 Done already: repo, GitHub Pages, custom domain, HTTPS, Actions write permissions, the
-Strava API application, and both `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET`.
+Strava API application, and `STRAVA_CLIENT_ID`.
 
-What is left is the four refresh tokens.
+What is left: `STRAVA_CLIENT_SECRET`, `ACTIONS_PAT`, and the four refresh tokens.
+Verified against the repo settings on 2026-08-25: `STRAVA_CLIENT_ID` is the only
+secret that actually exists. Do not trust a doc that says otherwise, check the
+Settings page.
 
 ### 1. Raise the connected athlete cap first
 
@@ -161,7 +172,7 @@ Settings, Secrets and variables, Actions.
 | Secret                   | Status       |
 | ------------------------ | ------------ |
 | `STRAVA_CLIENT_ID`       | set (274192) |
-| `STRAVA_CLIENT_SECRET`   | set          |
+| `STRAVA_CLIENT_SECRET`   | pending      |
 | `ACTIONS_PAT`            | pending      |
 | `STRAVA_REFRESH_ALI`     | pending      |
 | `STRAVA_REFRESH_JAKE`    | pending      |
