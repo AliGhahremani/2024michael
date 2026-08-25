@@ -113,12 +113,22 @@ def main():
         print(f"[{key}] {len(acts)} activities since {since}")
 
         for a in acts:
-            if a.get("type") not in ("Ride", "VirtualRide", "EBikeRide", "GravelRide", "MountainBikeRide"):
+            if a.get("type") not in ("Ride", "VirtualRide", "GravelRide", "MountainBikeRide"):
                 continue
             try:
                 detail = http(f"{API}/activities/{a['id']}?include_all_efforts=true", token=access)
             except Exception as e:
                 print(f"[{key}] activity {a['id']} fetch failed: {e}", file=sys.stderr)
+                continue
+
+            # ---- global exclusions: no e-bikes, no Peloton, for segments AND power ----
+            # Ali's rule: e-bike and Peloton rides do not count for anything.
+            # Zwift and other smart trainer rides arrive as VirtualRide with
+            # device_watts and are deliberately allowed.
+            dev = str(detail.get("device_name") or "").lower()
+            if detail.get("type") == "EBikeRide" or "peloton" in dev:
+                print(f"[{key}] skipping {a['id']}: e-bike or Peloton")
+                time.sleep(1)
                 continue
             for eff in detail.get("segment_efforts", []):
                 sid = eff.get("segment", {}).get("id")
@@ -141,7 +151,7 @@ def main():
                     changed = True
                     summary.append(f"{ath['display']} new PR on segment {sid}: {fmt_time(sec)}")
 
-            # ---- power bests: real meters only, no e-bikes, no Peloton ----
+            # ---- power bests: real meters only (e-bike/Peloton already excluded above) ----
             try:
                 dev = str(detail.get("device_name") or "").lower()
                 if (detail.get("device_watts") and detail.get("type") != "EBikeRide"
