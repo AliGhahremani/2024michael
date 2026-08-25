@@ -59,16 +59,32 @@ jobs:
             exit 1
           fi
 
+          # Length only, never the value. A Strava code is 40 hex characters.
+          echo "Code received: ${#CODE} characters."
+
           RESPONSE="$(curl -sS -X POST https://www.strava.com/oauth/token \
             -d client_id="$CLIENT_ID" \
             -d client_secret="$CLIENT_SECRET" \
             -d code="$CODE" \
             -d grant_type=authorization_code)"
 
+          # If it is not JSON at all, say so instead of letting jq fail silently.
+          if ! echo "$RESPONSE" | jq -e . > /dev/null 2>&1; then
+            echo "::error::Strava did not return JSON. Raw response below."
+            echo "$RESPONSE"
+            exit 1
+          fi
+
           if echo "$RESPONSE" | jq -e 'has("errors")' > /dev/null; then
+            # Safe to print: a failed exchange contains no token. This is here
+            # because "(: invalid)" with an empty field name told us nothing.
+            echo "Raw Strava error response:"
+            echo "$RESPONSE" | jq -c .
             FIELD="$(echo "$RESPONSE" | jq -r '.errors[0].field // "unknown"')"
+            RESOURCE="$(echo "$RESPONSE" | jq -r '.errors[0].resource // "unknown"')"
             REASON="$(echo "$RESPONSE" | jq -r '.errors[0].code // "unknown"')"
-            echo "::error::Strava rejected this ($FIELD: $REASON)."
+            MSG="$(echo "$RESPONSE" | jq -r '.message // "unknown"')"
+            echo "::error::Strava rejected this. message=$MSG resource=$RESOURCE field=$FIELD code=$REASON"
             echo "::error::If it says invalid, the code has already expired or been used. Have the rider open 2024michael.com/auth.html again."
             echo "::error::If it mentions the athlete limit, click Upgrade at strava.com/settings/api first."
             exit 1
