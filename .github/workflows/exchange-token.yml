@@ -62,6 +62,21 @@ jobs:
           # Length only, never the value. A Strava code is 40 hex characters.
           echo "Code received: ${#CODE} characters."
 
+          # ---- credential preflight ----
+          # Reveals nothing secret. Client ID is already public in auth.html.
+          # Strava answering resource=Application means these are wrong, not the code.
+          if [[ "$CLIENT_ID" == "274192" ]]; then
+            echo "CLIENT_ID matches the 274192 hardcoded in auth.html."
+          else
+            echo "::warning::CLIENT_ID does NOT match the 274192 in auth.html. Length ${#CLIENT_ID}."
+          fi
+          echo "CLIENT_SECRET length: ${#CLIENT_SECRET} (a Strava client secret is 40 hex chars)."
+          if [[ "$CLIENT_SECRET" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "CLIENT_SECRET is 40 lowercase hex characters, correct shape."
+          else
+            echo "::warning::CLIENT_SECRET is not 40 lowercase hex characters. Wrong value, or stray whitespace."
+          fi
+
           RESPONSE="$(curl -sS -X POST https://www.strava.com/oauth/token \
             -d client_id="$CLIENT_ID" \
             -d client_secret="$CLIENT_SECRET" \
