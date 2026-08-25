@@ -116,6 +116,7 @@ Repo Settings -> Secrets and variables -> Actions. Values are never stored here.
 |---|---|
 | `STRAVA_CLIENT_ID` | set (274192) |
 | `STRAVA_CLIENT_SECRET` | set |
+| `ACTIONS_PAT` | **pending** |
 | `STRAVA_REFRESH_ALI` | **pending** |
 | `STRAVA_REFRESH_JAKE` | **pending** |
 | `STRAVA_REFRESH_RANDEE` | **pending** |
@@ -124,9 +125,23 @@ Repo Settings -> Secrets and variables -> Actions. Values are never stored here.
 A rider with no token is skipped with a log line, not an error. The site keeps
 serving their existing baseline times, so a missing token degrades gracefully.
 
-**Never handle the client secret or refresh tokens on a rider's behalf.** Ali runs
-`scripts/exchange_token.py` himself. Authorization codes are single use and expire in
-minutes, so a code pasted into a chat is almost certainly already dead.
+`ACTIONS_PAT` is a fine-grained personal access token scoped to this repo only, with
+Secrets read and write. `.github/workflows/exchange-token.yml` needs it because
+`GITHUB_TOKEN` cannot write secrets. It is the one credential step nobody can take off
+Ali, since delegating it would mean the token passing through whoever is helping.
+
+**Never handle the client secret or refresh tokens on a rider's behalf.** The refresh
+tokens are produced by the Exchange Strava code workflow, which trades the code against
+the stored client secret inside Actions and writes `STRAVA_REFRESH_<RIDER>` directly.
+Nobody sees either value. `scripts/exchange_token.py` does the same job from a laptop
+and is kept as a fallback, but it means handling the client secret by hand, so prefer
+the workflow.
+
+Authorization codes are single use and expire in minutes, so a code pasted into a chat
+is almost certainly already dead. The relay is the weak point of this whole flow: the
+rider has to send the code and Ali has to run the workflow inside the same few minutes.
+Do riders one at a time, with the Actions tab already open, rather than sending all four
+the link at once.
 
 ## Strava API gotcha: Single Player Mode
 
@@ -159,14 +174,18 @@ Done:
 - All four card photos letterboxed so the full picture fits the card
   (`object-fit: contain`, `aspect-ratio: 480/340`).
 - Irvine Boyz logo as favicon.
+- `auth.html`, the rider-facing Strava authorization page.
+- `README.md` rewritten for 14 segments, live Michael, and the workflow token flow.
+- `.github/workflows/exchange-token.yml`, so no one handles the client secret.
 
 Pending:
+- `ACTIONS_PAT`. The exchange workflow fails without it.
 - All four refresh tokens. Nothing auto-updates until at least one lands.
 - Confirm the capacity upgrade is applied before asking riders to authorize.
-- `README.md` still describes the old six-segment, frozen-Michael setup and a
-  "create the repo" step that no longer applies. Needs a rewrite.
 - Attempt counts only accumulate where a baseline exists (Ali only). Others show a
   dash. A full-history backfill is possible but not written.
+- Rider photos to be replaced. Base64 WebP data URIs in `photos-*.js`, since binary
+  uploads are not available in this setup.
 
 ## Working notes
 

@@ -1,60 +1,187 @@
 # 2024michael.com
 
-Are you stronger than 2024 Michael? A self-updating standings site.
+Are you stronger than 2024 Michael? A self-updating cycling standings site for four
+friends, live at <https://2024michael.com>.
 
-- **Site**: `index.html` + `data.js` (static, hosted on GitHub Pages)
-- **Updater**: GitHub Actions runs `scripts/update.py` daily at 8:00 AM PDT (15:00 UTC; becomes 7:00 AM in winter — edit the cron in `.github/workflows/update.yml` if you care)
-- **Data**: each rider's own Strava account authorizes the app once; the script pulls only their *own* new activities via the official Strava API and updates rolling PRs. **Michael's benchmark times are frozen by design — he never needs to authorize anything.**
+**If you are picking this project up cold, read [HANDOFF.md](HANDOFF.md) first.** It is
+the authoritative description of how the project actually works. This file covers the
+overview and the remaining setup.
 
-## One-time setup (Ali)
+## The name is a joke, Michael is not frozen
 
-### 1. Create a Strava API application
-Go to https://www.strava.com/settings/api (logged in as you). Fill in:
-- Application name: `2024michael`
-- Website: `https://2024michael.com` (or anything)
-- Authorization Callback Domain: `localhost`
+"2024 Michael" is branding, nothing more. Michael is a live, auto-updating rider
+exactly like the other three, and he needs to authorize Strava exactly like the other
+three. The old `michael_frozen` block in `state.json` and its special-case logic in
+`update.py` were removed on 2026-08-24. Do not reintroduce them.
 
-Note the **Client ID** and **Client Secret**.
+## Riders
 
-### 2. Create the GitHub repo
-1. Create a new repo (public or private both work), e.g. `2024michael`.
-2. Push this folder's contents to it.
-3. Settings → Pages → Source: "Deploy from a branch" → branch `main`, folder `/ (root)`. Your site goes live at `https://<user>.github.io/2024michael/`.
-4. Settings → Actions → General → Workflow permissions → "Read and write permissions" (needed so the bot can commit updated data).
+| Rider   | Weight (lb) |
+| ------- | ----------- |
+| Ali     | 183         |
+| Michael | 170         |
+| Randee  | 185         |
+| Jake    | 190         |
 
-### 3. Add secrets
-Settings → Secrets and variables → Actions → New repository secret:
+Weights feed the W/kg display only. Ask Ali before changing them.
 
-| Secret | Value |
-|---|---|
-| `STRAVA_CLIENT_ID` | from step 1 |
-| `STRAVA_CLIENT_SECRET` | from step 1 |
-| `STRAVA_REFRESH_ALI` | from step 4 |
-| `STRAVA_REFRESH_JAKE` | from step 4 |
-| `STRAVA_REFRESH_RANDEE` | from step 4 |
+## Scoring
 
-### 4. Get refresh tokens (you, Jake, Randee)
-Send each rider this link (replace `CLIENT_ID`):
+Fourteen tracked segments, scored like a Tour de France General Classification.
+
+- **GC**: total elapsed time across all 14 segments. Lowest total wins the yellow jersey.
+- **Segment not attempted**: you are assessed the slowest finisher's time on that
+  segment plus 10 percent (`PENALTY = 1.10` in `index.html`). The multiplier is
+  deliberate so the penalty scales with segment length.
+- **KOM crown**: fastest rider on a segment.
+- **GOT BONED**: last place on a segment. Applies to whoever is slowest, not just Michael.
+
+## Power rules
+
+Cards show W/kg at 5, 10, 20, 30 and 60 minutes.
+
+Only real power meter data is ever published. Never Strava's estimates.
+
+- Requires `device_watts` on the activity.
+- No e-bike rides (`type == "EBikeRide"`).
+- No Peloton (`device_name` containing "peloton").
+- Zwift and outdoor rides are fine as long as a power meter was recording.
+
+Baseline numbers in `OFFICIAL_W` came from the riders' own Strava best-efforts pages
+and are authoritative. `update.py` only overwrites a value when the new one beats it.
+If a power curve looks physiologically impossible, it is. Flag it, do not publish it.
+
+## Architecture
+
+Static site. No build step, no framework, no bundler.
 
 ```
-https://www.strava.com/oauth/authorize?client_id=CLIENT_ID&response_type=code&redirect_uri=http://localhost&approval_prompt=force&scope=activity:read_all
+index.html                    markup, CSS and all client-side logic
+auth.html                     Strava authorization landing page for riders
+data.js                       generated. window.SITE_DATA = {updated, segs, power}
+avatars.js                    small circular avatars for the segment tables
+photos-*.js                   one per rider, full card photo as a base64 WebP data URI
+data/state.json               source of truth. Rolling PRs, attempt counts, power bests
+data/meta.json                segment metadata and map polylines
+scripts/update.py             the daily updater
+scripts/exchange_token.py     OAuth code to refresh token helper, fallback only
+.github/workflows/update.yml  cron
+.github/workflows/exchange-token.yml  code to refresh token, no secret handling
+CNAME                         2024michael.com
 ```
 
-They click **Authorize**, land on a broken `localhost` page (expected), and immediately send you the **full URL from the address bar** (the code in it expires within minutes). Then run:
+Maps are Leaflet 1.9.4 from unpkg with CARTO `light_all` tiles.
 
-```
-python scripts/exchange_token.py CLIENT_ID CLIENT_SECRET "PASTED_URL_OR_CODE"
-```
+**Do not hand-edit `data.js`.** The Action regenerates and force-commits it. Edit
+`data/state.json` or `update.py` instead.
 
-It prints the athlete's refresh token — store it as that rider's secret. Refresh tokens are long-lived; this is one-time per rider.
-
-### 5. Test
-Actions tab → "Update standings" → **Run workflow**. Green check = working. The site's "Last updated" date in the footer confirms it.
+Polyline keys in `data/meta.json` must stay sorted numerically. If you regenerate from
+Python, sort with `key=int` or the file churns on every run.
 
 ## How updates work
-- The script fetches each authorized rider's activities since the last run (with a 3-day overlap for late uploads), scans their segment efforts on the six tracked segments, and updates `data/state.json` + `data.js`. New PRs and attempt counts flow to the page automatically; standings and YES/NO badges are computed client-side.
-- Riders who haven't authorized simply keep their baseline times (scraped Aug 22, 2026).
-- Attempt counts only accumulate where a baseline count exists (currently Ali only). Jake/Randee show "—" — Strava doesn't expose historical counts without scanning their full history (possible later; edit `update.py` if you want a full backfill).
 
-## Pointing 2024michael.com at it (later)
-Buy the domain, then: repo Settings → Pages → Custom domain → `2024michael.com`, and add the DNS records GitHub shows you at your registrar. HTTPS is automatic.
+`.github/workflows/update.yml` runs `scripts/update.py` on cron `0 15 * * *`, which is
+08:00 PDT and 07:00 PST in winter. It can also be run by hand from Actions, Update
+standings, Run workflow.
+
+This is a daily batch job, not a webhook. Rides do not appear the moment they are
+uploaded. For each rider holding a refresh token the script:
+
+1. Lists activities since `last_epoch` minus a 3 day overlap, to catch late uploads.
+2. Fetches each activity with `include_all_efforts=true` and scans efforts against the
+   14 tracked segment IDs, updating PRs and attempt counts.
+3. Pulls `time` and `watts` streams and computes best rolling averages at
+   300, 600, 1200, 1800 and 3600 seconds, subject to the power rules above.
+4. Rewrites `data/state.json` and `data.js`, and commits if anything changed.
+
+It sleeps 1 second per activity to stay inside Strava's rate limits.
+
+A rider with no refresh token is skipped with a log line, not an error. Their existing
+baseline times keep serving, so a missing token degrades gracefully. The side effect is
+that an unauthorized rider currently looks identical to a frozen one.
+
+Attempt counts only accumulate where a baseline count already exists, currently Ali
+only. Everyone else shows a dash. A full history backfill is possible but not written.
+
+## Remaining setup
+
+Done already: repo, GitHub Pages, custom domain, HTTPS, Actions write permissions, the
+Strava API application, and both `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET`.
+
+What is left is the four refresh tokens.
+
+### 1. Raise the connected athlete cap first
+
+New Strava API applications are capped at **one connected athlete**. The second rider
+to authorize gets `Error 403: Limit of connected athletes exceeded`, and their
+authorization code is burnt. Codes are single use.
+
+Click **Upgrade** at <https://www.strava.com/settings/api> before sending anyone the
+link. That raises the cap to 10 athletes and lifts the rate limits. Strava only
+requires a formal app review above 10 athletes, so four riders is fine.
+
+### 2. Confirm the Strava callback domain
+
+Authorization Callback Domain must be `2024michael.com` for `auth.html` to work.
+
+### 3. Send riders the link
+
+Send each rider <https://2024michael.com/auth.html>. They tap Authorize, leave all
+permission boxes ticked, land back on the page, and send Ali the code it displays. The
+page warns them if a permission box was unticked and shows a countdown so they send it
+promptly.
+
+Codes die within minutes, so do the riders one at a time and only when you are at a
+computer with the Actions tab already open. A code that sits in a text thread while you
+find your laptop is a dead code.
+
+### 4. Exchange each code for a refresh token
+
+Actions, Exchange Strava code, Run workflow. Pick the rider, paste the code, run it. The
+workflow trades the code against the stored client secret, masks the token, and writes
+`STRAVA_REFRESH_<RIDER>` for you. Nobody has to see the secret or the token.
+
+It needs `ACTIONS_PAT` to exist first, because `GITHUB_TOKEN` cannot write secrets. That
+is a fine-grained personal access token scoped to this repo only, with Secrets read and
+write.
+
+One tradeoff to know: this repo is public, so the pasted code appears in the run metadata
+for anyone who looks. The code is consumed and dead by the time the run finishes, so this
+is noise rather than exposure, but it is the reason the token itself never appears.
+
+`scripts/exchange_token.py` does the same job from a laptop and is kept as a fallback,
+but it means handling the client secret by hand. Prefer the workflow.
+
+Refresh tokens are long lived, so this is once per rider.
+
+### 5. Secrets
+
+Settings, Secrets and variables, Actions.
+
+| Secret                   | Status       |
+| ------------------------ | ------------ |
+| `STRAVA_CLIENT_ID`       | set (274192) |
+| `STRAVA_CLIENT_SECRET`   | set          |
+| `ACTIONS_PAT`            | pending      |
+| `STRAVA_REFRESH_ALI`     | pending      |
+| `STRAVA_REFRESH_JAKE`    | pending      |
+| `STRAVA_REFRESH_RANDEE`  | pending      |
+| `STRAVA_REFRESH_MICHAEL` | pending      |
+
+### 6. Test
+
+Actions, Update standings, Run workflow. A green check means it worked, and the
+"Last updated" date in the site footer confirms it end to end.
+
+## Credential handling
+
+Never handle the client secret or another rider's refresh token on their behalf.
+Authorization codes are single use and expire within minutes, so a code sitting in a
+chat log is almost certainly already dead.
+
+## House rules
+
+- Keep the tone. This is a trash-talk site, not a diplomatic one.
+- No em dashes in site copy.
+- Binary uploads are not available in this setup, which is why rider photos live as
+  base64 data URIs inside `photos-*.js` rather than as image files.
