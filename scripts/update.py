@@ -136,10 +136,8 @@ def main():
                     continue
                 sid_s = str(sid)
                 sec = int(eff["elapsed_time"])
-                # attempts: increment only if we track an absolute count for this athlete
-                if ath["attempts"].get(sid_s) is not None:
-                    ath["attempts"][sid_s] += 1
-                    changed = True
+                # attempts are no longer incremented here. Strava's own
+                # effort_count is fetched below and is authoritative.
                 best = ath["bests"].get(sid_s)
                 if best is None or sec < best["sec"]:
                     watts = eff.get("average_watts")
@@ -170,6 +168,34 @@ def main():
             except Exception as e:
                 print(f"[{key}] power calc failed for {a['id']}: {e}", file=sys.stderr)
             time.sleep(1)  # be polite to rate limits
+
+        # ---- authoritative attempt counts ----
+        # GET /segments/{id} returns athlete_segment_stats for the authenticated
+        # athlete. effort_count there is Strava's own all-time total, so it does
+        # not depend on us having seen every ride, and it self-corrects.
+        # 14 segments per rider per run. Read limit is 200/15min, 2000/day.
+        for sid in sorted(TRACKED):
+            sid_s = str(sid)
+            try:
+                seg = http(f"{API}/segments/{sid}", token=access)
+            except Exception as e:
+                print(f"[{key}] segment {sid} stats fetch failed: {e}", file=sys.stderr)
+                continue
+            stats = seg.get("athlete_segment_stats") or {}
+            count = stats.get("effort_count")
+            if count is None:
+                # Field absent. Log the keys once so we can see what Strava sent
+                # instead of guessing, then leave the existing value alone.
+                print(f"[{key}] segment {sid}: no effort_count. "
+                      f"athlete_segment_stats keys = {sorted(stats.keys())}", file=sys.stderr)
+                continue
+            count = int(count)
+            if ath["attempts"].get(sid_s) != count:
+                ath["attempts"][sid_s] = count
+                changed = True
+            time.sleep(0.4)
+        print(f"[{key}] attempt counts: "
+              f"{sum(1 for v in ath['attempts'].values() if v is not None)}/{len(TRACKED)} segments populated")
 
         if ath.get("last_epoch") != now:
             ath["last_epoch"] = now
