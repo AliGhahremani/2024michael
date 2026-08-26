@@ -80,7 +80,7 @@
   .seg-body{display:grid;grid-template-columns:320px 1fr;gap:22px;padding:20px 24px 24px}
   .seg-body>div{min-width:0}
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
-  .tblwrap .tbl{min-width:620px}
+  .tblwrap .tbl{min-width:790px}
   @media(max-width:800px){.seg-body{grid-template-columns:1fr;padding:16px 14px 18px}.seg-head{padding:18px 16px 0}.stats{padding:14px 16px 0}}
   .routebox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column}
   .segmap{height:240px;border-radius:8px}
@@ -96,6 +96,9 @@
   .tbl tr.mrow .rav{border-color:var(--orange)}
   .tbl .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;white-space:nowrap}
   .tbl .date,.tbl .pw{color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .tbl .spd{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .tbl .lead{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .tbl .lead.kom{color:var(--gold)}
   .tbl tr.mrow{background:linear-gradient(90deg,rgba(252,82,0,.08),rgba(252,82,0,.02))}
   .tbl tr.mrow .rider::after{content:"THE BENCHMARK";font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--orange);border:1px solid rgba(252,82,0,.5);border-radius:4px;padding:2px 6px;margin-left:9px;vertical-align:1px}
   .pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.08em;border-radius:6px;padding:4px 11px}
@@ -170,6 +173,19 @@ function fmtClock(sec){
   sec = Math.round(sec);
   const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
   return h ? h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0") : m+":"+String(s).padStart(2,"0");
+}
+// Gap to the fastest rider on this segment. Leader shows a dash, not "+0:00".
+function fmtLead(sec, bestSec){
+  if (sec == null || bestSec == null) return "\u2014";
+  const d = sec - bestSec;
+  return d === 0 ? "\u2014" : "+" + fmtClock(d);
+}
+// Average speed over the segment. `dist` arrives as a string like "1.11 mi".
+function fmtSpeed(sec, dist){
+  if (sec == null || !dist) return "\u2014";
+  const mi = parseFloat(dist);
+  if (!isFinite(mi) || mi <= 0) return "\u2014";
+  return (mi / (sec/3600)).toFixed(1) + " mph";
 }
 function fmtGap(sec, mSec){
   const d = mSec - sec;
@@ -304,6 +320,7 @@ function routeMap(divId, pl, interactive){
     const m = sg.riders.find(r=>r.name===MICHAEL);
     const finishers = sg.riders.filter(r=>r.sec!=null);
     const worstSec = finishers.length>1 ? Math.max(...finishers.map(r=>r.sec)) : null;
+    const bestSec = finishers.length ? Math.min(...finishers.map(r=>r.sec)) : null;
     const pen = segPenalty[sg.id];
     let rank = 0;
     const rows = sg.riders.map(r=>{
@@ -324,8 +341,10 @@ function routeMap(divId, pl, interactive){
       const attTxt = r.attempts!=null ? " · "+r.attempts+" attempts" : "";
       return '<tr class="'+(isM?"mrow":"")+'"><td class="rk">'+(r.sec==null?"—":rank)+'</td>'+
         '<td class="rider">'+avImg(r.name,"rav")+r.name+'</td><td class="time">'+r.time+'</td>'+
+        '<td class="spd">'+fmtSpeed(r.sec, sg.dist)+'</td>'+
         '<td class="date">'+r.date+attTxt+'</td>'+
-        '<td class="pw">'+(r.watts?r.watts+" W":"—")+'</td>'+
+        '<td class="pw">'+(r.watts?r.watts+" W":"\u2014")+'</td>'+
+        '<td class="lead'+(r.sec!=null && r.sec===bestSec ? ' kom' : '')+'">'+fmtLead(r.sec, bestSec)+'</td>'+
         '<td>'+pill+'</td></tr>';
     }).join("");
     const el = document.createElement("div");
@@ -343,7 +362,7 @@ function routeMap(divId, pl, interactive){
      '<div class="seg-body">'+
        '<div class="routebox"><div class="segmap" id="map'+sg.id+'"></div>'+
        '<div class="lg"><span><i style="background:#12813f"></i>START</span><span><i style="background:#fc5200"></i>FINISH</span><span style="margin-left:auto">GPS · Strava</span></div></div>'+
-       '<div><div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Date</th><th>Power</th><th>Faster than Michael?</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+       '<div><div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rider</th><th>Time</th><th>Avg Speed</th><th>Date</th><th>Power</th><th>Gap to 1st</th><th>Faster than Michael?</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
        '</div></div>';
     list.appendChild(el);
     routeMap('map'+sg.id, sg.pl, false);
