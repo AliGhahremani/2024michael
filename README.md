@@ -19,8 +19,8 @@ three. The old `michael_frozen` block in `state.json` and its special-case logic
 | Rider   | Weight (lb) |
 | ------- | ----------- |
 | Ali     | 183         |
-| Michael | 170         |
-| Randee  | 185         |
+| Michael | 175         |
+| Randee  | 187         |
 | Jake    | 190         |
 
 Weights feed the W/kg display only. Ask Ali before changing them.

@@ -27,8 +27,8 @@ Any doc or comment claiming Michael is a frozen benchmark is stale.
 | Rider | Weight (lb) | Notes |
 |---|---|---|
 | Ali | 183 | repo owner |
-| Michael | 170 | the "2024 Michael" of the title |
-| Randee | 185 | |
+| Michael | 175 | the "2024 Michael" of the title |
+| Randee | 187 | |
 | Jake | 190 | |
 
 Weights are used only for the W/kg power display. Ali set them; ask before changing.
