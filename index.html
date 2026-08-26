@@ -159,7 +159,14 @@
 const D = window.SITE_DATA;
 const AV = window.AVATARS || {};
 const PH = window.PHOTOS || {};
-const LINKS = (window.SITE_DATA && window.SITE_DATA.links) || {};
+// Strava athlete ids, supplied by Ali 2026-08-26. update.py also caches these
+// per rider and exports SITE_DATA.links, which wins if present.
+const LINKS = Object.assign({
+  Ali:     "https://www.strava.com/athletes/20156041",
+  Jake:    "https://www.strava.com/athletes/2977194",
+  Michael: "https://www.strava.com/athletes/37685935",
+  Randee:  "https://www.strava.com/athletes/100854849"
+}, (window.SITE_DATA && window.SITE_DATA.links) || {});
 // Wrap a rider's name in a link to their Strava profile, when we have their id.
 const nameLink = (name, inner) => LINKS[name]
   ? '<a class="slink" href="'+LINKS[name]+'" target="_blank" rel="noopener noreferrer">'+inner+'</a>'
