@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "2024michael-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/state.json data.js
+          git add data/state.json data.js data/last_run.json
           if git diff --cached --quiet; then
             echo "No changes."
           else
