@@ -8,7 +8,7 @@ attempt counts in data/state.json, then regenerates data.js for the site.
 All four riders (Ali, Jake, Randee, Michael) are tracked live. The "2024 Michael"
 branding on the site is a gimmick, not a frozen data set.
 """
-import json, os, sys, time, datetime, urllib.request, urllib.parse
+import json, os, sys, time, datetime, urllib.request, urllib.parse, urllib.error
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE_PATH = os.path.join(ROOT, "data", "state.json")
@@ -21,12 +21,42 @@ TRACKED = {s["id"] for s in _meta["segments"]}
 OVERLAP = 3 * 86400  # re-scan 3 days back to catch late uploads
 PWINDOWS = [300, 600, 1200, 1800, 3600]  # power best-effort windows (sec)
 
+# Strava Standard Tier: 200 reads / 15 min, 2000 reads / day, shared across ALL
+# riders because the limit is per application. A first-time backfill of one rider
+# with several hundred activities will exceed the 15 minute window, so the script
+# waits it out, and stops cleanly when this run's budget is gone.
+READ_BUDGET = 1200          # calls per run, well under the 2000/day ceiling
+MAX_429_WAITS = 4           # at most ~4 x 15 min of waiting in one run
+_reads = {"n": 0, "waits": 0}
+
+class BudgetExhausted(Exception):
+    """This run has used its share of the daily rate limit. Save and resume tomorrow."""
+
 def http(url, data=None, token=None):
-    req = urllib.request.Request(url, data=data)
-    if token:
-        req.add_header("Authorization", f"Bearer {token}")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode())
+    is_read = data is None
+    if is_read and _reads["n"] >= READ_BUDGET:
+        raise BudgetExhausted(f"run budget of {READ_BUDGET} reads reached")
+    for attempt in range(MAX_429_WAITS + 1):
+        req = urllib.request.Request(url, data=data)
+        if token:
+            req.add_header("Authorization", f"Bearer {token}")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                if is_read:
+                    _reads["n"] += 1
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code != 429:
+                raise
+            if attempt >= MAX_429_WAITS:
+                raise BudgetExhausted("still rate limited after waiting")
+            _reads["waits"] += 1
+            # Wait out the current 15 minute window, plus a little slack.
+            wait = 15 * 60 - (int(time.time()) % (15 * 60)) + 20
+            print(f"rate limited (429). waiting {wait}s for the window to reset "
+                  f"[{_reads['n']} reads used this run]", flush=True)
+            time.sleep(wait)
+    raise BudgetExhausted("unreachable")
 
 def refresh_access_token(client_id, client_secret, refresh_token):
     body = urllib.parse.urlencode({
@@ -101,105 +131,124 @@ def main():
         access = tok["access_token"]
         since = max(0, int(ath.get("last_epoch", 0)) - OVERLAP)
         now = int(time.time())
+        try:
 
-        # list activities since last check (paginated)
-        acts, page = [], 1
-        while True:
-            batch = http(f"{API}/athlete/activities?after={since}&per_page=100&page={page}", token=access)
-            acts.extend(batch)
-            if len(batch) < 100:
-                break
-            page += 1
-        print(f"[{key}] {len(acts)} activities since {since}")
-
-        for a in acts:
-            if a.get("type") not in ("Ride", "VirtualRide", "GravelRide", "MountainBikeRide"):
-                continue
-            try:
-                detail = http(f"{API}/activities/{a['id']}?include_all_efforts=true", token=access)
-            except Exception as e:
-                print(f"[{key}] activity {a['id']} fetch failed: {e}", file=sys.stderr)
-                continue
-
-            # ---- global exclusions: no e-bikes, no Peloton, for segments AND power ----
-            # Ali's rule: e-bike and Peloton rides do not count for anything.
-            # Zwift and other smart trainer rides arrive as VirtualRide with
-            # device_watts and are deliberately allowed.
-            dev = str(detail.get("device_name") or "").lower()
-            if detail.get("type") == "EBikeRide" or "peloton" in dev:
-                print(f"[{key}] skipping {a['id']}: e-bike or Peloton")
-                time.sleep(1)
-                continue
-            for eff in detail.get("segment_efforts", []):
-                sid = eff.get("segment", {}).get("id")
-                if sid not in TRACKED:
-                    continue
+            # ---- authoritative attempt counts ----
+            # GET /segments/{id} returns athlete_segment_stats for the authenticated
+            # athlete. effort_count there is Strava's own all-time total, so it does
+            # not depend on us having seen every ride, and it self-corrects.
+            # 14 segments per rider per run. Read limit is 200/15min, 2000/day.
+            for sid in sorted(TRACKED):
                 sid_s = str(sid)
-                sec = int(eff["elapsed_time"])
-                # attempts are no longer incremented here. Strava's own
-                # effort_count is fetched below and is authoritative.
-                best = ath["bests"].get(sid_s)
-                if best is None or sec < best["sec"]:
-                    watts = eff.get("average_watts")
-                    ath["bests"][sid_s] = {
-                        "sec": sec, "time": fmt_time(sec),
-                        "date": fmt_date(eff.get("start_date_local", a.get("start_date_local", ""))),
-                        "watts": round(watts) if watts else None,
-                    }
+                try:
+                    seg = http(f"{API}/segments/{sid}", token=access)
+                except BudgetExhausted:
+                    raise
+                except Exception as e:
+                    print(f"[{key}] segment {sid} stats fetch failed: {e}", file=sys.stderr)
+                    continue
+                stats = seg.get("athlete_segment_stats") or {}
+                count = stats.get("effort_count")
+                if count is None:
+                    # Field absent. Log the keys once so we can see what Strava sent
+                    # instead of guessing, then leave the existing value alone.
+                    print(f"[{key}] segment {sid}: no effort_count. "
+                          f"athlete_segment_stats keys = {sorted(stats.keys())}", file=sys.stderr)
+                    continue
+                count = int(count)
+                if ath["attempts"].get(sid_s) != count:
+                    ath["attempts"][sid_s] = count
                     changed = True
-                    summary.append(f"{ath['display']} new PR on segment {sid}: {fmt_time(sec)}")
+                time.sleep(0.4)
+            print(f"[{key}] attempt counts: "
+                  f"{sum(1 for v in ath['attempts'].values() if v is not None)}/{len(TRACKED)} segments populated")
 
-            # ---- power bests: real meters only (e-bike/Peloton already excluded above) ----
-            try:
+            # list activities since last check (paginated)
+            acts, page = [], 1
+            while True:
+                batch = http(f"{API}/athlete/activities?after={since}&per_page=100&page={page}", token=access)
+                acts.extend(batch)
+                if len(batch) < 100:
+                    break
+                page += 1
+            print(f"[{key}] {len(acts)} activities since {since}")
+            # Oldest first. If we run out of budget partway, last_epoch can advance to
+            # the last activity we actually finished and tomorrow picks up from there.
+            acts.sort(key=lambda a: a.get("start_date") or "")
+            progress_epoch = None
+
+            for a in acts:
+                if a.get("type") not in ("Ride", "VirtualRide", "GravelRide", "MountainBikeRide"):
+                    continue
+                try:
+                    detail = http(f"{API}/activities/{a['id']}?include_all_efforts=true", token=access)
+                except Exception as e:
+                    print(f"[{key}] activity {a['id']} fetch failed: {e}", file=sys.stderr)
+                    continue
+
+                # ---- global exclusions: no e-bikes, no Peloton, for segments AND power ----
+                # Ali's rule: e-bike and Peloton rides do not count for anything.
+                # Zwift and other smart trainer rides arrive as VirtualRide with
+                # device_watts and are deliberately allowed.
                 dev = str(detail.get("device_name") or "").lower()
-                if (detail.get("device_watts") and detail.get("type") != "EBikeRide"
-                        and "peloton" not in dev):
-                    sj = http(f"{API}/activities/{a['id']}/streams?keys=time,watts&key_by_type=true", token=access)
-                    tt = (sj.get("time") or {}).get("data") or []
-                    ww = (sj.get("watts") or {}).get("data") or []
-                    bests = best_window_avgs(tt, ww, PWINDOWS)
-                    pw = ath.setdefault("power", {})
-                    for w, val in bests.items():
-                        k = str(w)
-                        if val > int(pw.get(k) or 0):
-                            pw[k] = val
-                            changed = True
-                            summary.append(f"{ath['display']} new {w//60} min power: {val} W")
-            except Exception as e:
-                print(f"[{key}] power calc failed for {a['id']}: {e}", file=sys.stderr)
-            time.sleep(1)  # be polite to rate limits
+                if detail.get("type") == "EBikeRide" or "peloton" in dev:
+                    print(f"[{key}] skipping {a['id']}: e-bike or Peloton")
+                    time.sleep(1)
+                    continue
+                for eff in detail.get("segment_efforts", []):
+                    sid = eff.get("segment", {}).get("id")
+                    if sid not in TRACKED:
+                        continue
+                    sid_s = str(sid)
+                    sec = int(eff["elapsed_time"])
+                    # attempts are no longer incremented here. Strava's own
+                    # effort_count is fetched below and is authoritative.
+                    best = ath["bests"].get(sid_s)
+                    if best is None or sec < best["sec"]:
+                        watts = eff.get("average_watts")
+                        ath["bests"][sid_s] = {
+                            "sec": sec, "time": fmt_time(sec),
+                            "date": fmt_date(eff.get("start_date_local", a.get("start_date_local", ""))),
+                            "watts": round(watts) if watts else None,
+                        }
+                        changed = True
+                        summary.append(f"{ath['display']} new PR on segment {sid}: {fmt_time(sec)}")
 
-        # ---- authoritative attempt counts ----
-        # GET /segments/{id} returns athlete_segment_stats for the authenticated
-        # athlete. effort_count there is Strava's own all-time total, so it does
-        # not depend on us having seen every ride, and it self-corrects.
-        # 14 segments per rider per run. Read limit is 200/15min, 2000/day.
-        for sid in sorted(TRACKED):
-            sid_s = str(sid)
-            try:
-                seg = http(f"{API}/segments/{sid}", token=access)
-            except Exception as e:
-                print(f"[{key}] segment {sid} stats fetch failed: {e}", file=sys.stderr)
-                continue
-            stats = seg.get("athlete_segment_stats") or {}
-            count = stats.get("effort_count")
-            if count is None:
-                # Field absent. Log the keys once so we can see what Strava sent
-                # instead of guessing, then leave the existing value alone.
-                print(f"[{key}] segment {sid}: no effort_count. "
-                      f"athlete_segment_stats keys = {sorted(stats.keys())}", file=sys.stderr)
-                continue
-            count = int(count)
-            if ath["attempts"].get(sid_s) != count:
-                ath["attempts"][sid_s] = count
+                # ---- power bests: real meters only (e-bike/Peloton already excluded above) ----
+                try:
+                    dev = str(detail.get("device_name") or "").lower()
+                    if (detail.get("device_watts") and detail.get("type") != "EBikeRide"
+                            and "peloton" not in dev):
+                        sj = http(f"{API}/activities/{a['id']}/streams?keys=time,watts&key_by_type=true", token=access)
+                        tt = (sj.get("time") or {}).get("data") or []
+                        ww = (sj.get("watts") or {}).get("data") or []
+                        bests = best_window_avgs(tt, ww, PWINDOWS)
+                        pw = ath.setdefault("power", {})
+                        for w, val in bests.items():
+                            k = str(w)
+                            if val > int(pw.get(k) or 0):
+                                pw[k] = val
+                                changed = True
+                                summary.append(f"{ath['display']} new {w//60} min power: {val} W")
+                except Exception as e:
+                    print(f"[{key}] power calc failed for {a['id']}: {e}", file=sys.stderr)
+                progress_epoch = int(datetime.datetime.fromisoformat(
+                    (a.get("start_date") or "").replace("Z", "+00:00")).timestamp()) \
+                    if a.get("start_date") else progress_epoch
+                time.sleep(1)  # be polite to rate limits
+
+            if ath.get("last_epoch") != now:
+                ath["last_epoch"] = now
                 changed = True
-            time.sleep(0.4)
-        print(f"[{key}] attempt counts: "
-              f"{sum(1 for v in ath['attempts'].values() if v is not None)}/{len(TRACKED)} segments populated")
-
-        if ath.get("last_epoch") != now:
-            ath["last_epoch"] = now
-            changed = True
+        except BudgetExhausted as e:
+            # Not a failure. We used our share of the rate limit. Save how far we
+            # got so tomorrow resumes instead of starting over, and keep going
+            # with the other riders (they will hit the same wall and save too).
+            print(f"[{key}] stopped early: {e}", file=sys.stderr)
+            if progress_epoch and progress_epoch > int(ath.get("last_epoch", 0)):
+                ath["last_epoch"] = progress_epoch
+                changed = True
+                print(f"[{key}] progress saved. resumes from {progress_epoch}", file=sys.stderr)
 
     if changed:
         state["updated"] = datetime.date.today().strftime("%b %d, %Y").replace(" 0", " ")
