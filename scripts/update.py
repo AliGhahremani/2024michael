@@ -163,6 +163,9 @@ def main():
     state = json.load(open(STATE_PATH))
     changed = False
     summary = []
+    # GitHub Actions logs need a sign in, so anything an unattended check needs to
+    # know gets written to data/last_run.json and committed. That file is public.
+    report = {"riders": {}, "notes": []}
 
     for key, ath in state["athletes"].items():
         rt = tokens.get(key)
@@ -212,16 +215,22 @@ def main():
                 if count is None:
                     # Field absent. Log the keys once so we can see what Strava sent
                     # instead of guessing, then leave the existing value alone.
-                    print(f"[{key}] segment {sid}: no effort_count. "
-                          f"athlete_segment_stats keys = {sorted(stats.keys())}", file=sys.stderr)
+                    msg = (f"segment {sid}: no effort_count. "
+                           f"athlete_segment_stats keys = {sorted(stats.keys())}")
+                    print(f"[{key}] {msg}", file=sys.stderr)
+                    print(f"::warning::{key}: {msg}")
+                    report["effort_count_supported"] = False
+                    report["notes"].append(f"{key}: {msg}")
                     continue
+                report.setdefault("effort_count_supported", True)
                 count = int(count)
                 if ath["attempts"].get(sid_s) != count:
                     ath["attempts"][sid_s] = count
                     changed = True
                 time.sleep(0.4)
-            print(f"[{key}] attempt counts: "
-                  f"{sum(1 for v in ath['attempts'].values() if v is not None)}/{len(TRACKED)} segments populated")
+            populated = sum(1 for v in ath["attempts"].values() if v is not None)
+            print(f"[{key}] attempt counts: {populated}/{len(TRACKED)} segments populated")
+            report["riders"].setdefault(key, {})["attempts_populated"] = populated
 
             # list activities since last check (paginated)
             acts, page = [], 1
@@ -232,6 +241,7 @@ def main():
                     break
                 page += 1
             print(f"[{key}] {len(acts)} activities since {since}")
+            report["riders"].setdefault(key, {})["activities_seen"] = len(acts)
             # Oldest first. If we run out of budget partway, last_epoch can advance to
             # the last activity we actually finished and tomorrow picks up from there.
             acts.sort(key=lambda a: a.get("start_date") or "")
@@ -305,6 +315,8 @@ def main():
             # got so tomorrow resumes instead of starting over, and keep going
             # with the other riders (they will hit the same wall and save too).
             print(f"[{key}] stopped early: {e}", file=sys.stderr)
+            print(f"::notice::{key} stopped early (not a failure): {e}")
+            report["riders"].setdefault(key, {})["stopped_early"] = str(e)
             if progress_epoch and progress_epoch > int(ath.get("last_epoch", 0)):
                 ath["last_epoch"] = progress_epoch
                 changed = True
@@ -350,10 +362,32 @@ def main():
         json.dump(payload, f, separators=(",", ":"))
         f.write(";\n")
 
-    print(f"RATE LIMIT: {_rl['reads']} reads this run, {_rl['waits']} window waits. "
-          f"Strava reports window {_rl['win_used']}/{_rl['win_limit']}, "
-          f"daily {_rl['day_used']}/{_rl['day_limit']}.")
+    rate_line = (f"{_rl['reads']} reads this run, {_rl['waits']} window waits. "
+                 f"Strava reports window {_rl['win_used']}/{_rl['win_limit']}, "
+                 f"daily {_rl['day_used']}/{_rl['day_limit']}.")
+    print("RATE LIMIT:", rate_line)
+    print(f"::notice::Rate limit: {rate_line}")
     print("SUMMARY:", "; ".join(summary) if summary else "no PR changes")
+
+    # Public run report. Actions logs need authentication; this file does not, so
+    # an unattended check can read it from raw.githubusercontent.com.
+    report.update({
+        "finished_utc": datetime.datetime.now(datetime.timezone.utc)
+                          .strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "reads_this_run": _rl["reads"],
+        "window_waits": _rl["waits"],
+        "rate_limit_window": f"{_rl['win_used']}/{_rl['win_limit']}",
+        "rate_limit_daily": f"{_rl['day_used']}/{_rl['day_limit']}",
+        "tokens_present": sorted(k for k, v in tokens.items() if v),
+        "tokens_missing": sorted(k for k, v in tokens.items() if not v),
+        "changes": summary,
+        "backfill_complete": all(
+            not r.get("stopped_early") for r in report["riders"].values()
+        ) and not report["notes"],
+    })
+    with open(os.path.join(os.path.dirname(STATE_PATH), "last_run.json"), "w") as f:
+        json.dump(report, f, indent=2)
+        f.write("\n")
 
 if __name__ == "__main__":
     main()
