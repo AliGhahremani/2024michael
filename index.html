@@ -149,7 +149,7 @@
 </div></section>
 
 <footer><div class="wrap">
-  <p>Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
+  <p>Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a> · Maps &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, tiles by <a href="https://carto.com/attributions">CARTO</a>.</p>
 </div></footer>
 
 <script src="data.js"></script>
@@ -384,6 +384,9 @@ function routeMap(divId, pl, interactive){
 // ---- battleground overview map ----
 (function(){
   const map = L.map('bigmap', {scrollWheelZoom:false});
+  // Drop the "Leaflet" prefix but keep the OpenStreetMap and CARTO credit, which
+  // their licences require. Do not swap this for attributionControl:false.
+  map.attributionControl.setPrefix('');
   L.tileLayer(TILES, TILE_OPTS).addTo(map);
   let bounds = null;
   D.segs.forEach(sg=>{
