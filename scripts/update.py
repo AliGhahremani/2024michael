@@ -133,6 +133,20 @@ def main():
         now = int(time.time())
         try:
 
+            # ---- Strava athlete id, fetched once and cached ----
+            # Used to link each rider's name on the site to their Strava profile.
+            if not ath.get("strava_id"):
+                try:
+                    me = http(f"{API}/athlete", token=access)
+                    if me.get("id"):
+                        ath["strava_id"] = int(me["id"])
+                        changed = True
+                        print(f"[{key}] strava id {ath['strava_id']}")
+                except BudgetExhausted:
+                    raise
+                except Exception as e:
+                    print(f"[{key}] could not read athlete id: {e}", file=sys.stderr)
+
             # ---- authoritative attempt counts ----
             # GET /segments/{id} returns athlete_segment_stats for the authenticated
             # athlete. effort_count there is Strava's own all-time total, so it does
@@ -279,7 +293,12 @@ def main():
     for key, ath in state["athletes"].items():
         if ath.get("power"):
             power_out[ath["display"]] = ath["power"]
-    payload = {"updated": state["updated"], "segs": segs_out, "power": power_out}
+    links_out = {}
+    for key, ath in state["athletes"].items():
+        if ath.get("strava_id"):
+            links_out[ath["display"]] = f"https://www.strava.com/athletes/{ath['strava_id']}"
+    payload = {"updated": state["updated"], "segs": segs_out,
+               "power": power_out, "links": links_out}
     with open(DATA_JS_PATH, "w") as f:
         f.write("window.SITE_DATA = ")
         json.dump(payload, f, separators=(",", ":"))
