@@ -174,7 +174,7 @@
 </div></section>
 
 <footer><div class="wrap">
-  <p>Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a> · Maps &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, tiles by <a href="https://carto.com/attributions">CARTO</a>.</p>
+  <p>Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a> · Map tiles &copy; <a href="https://www.esri.com">Esri</a>, sources including <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
 </div></footer>
 
 <script src="data.js"></script>
@@ -337,12 +337,18 @@ const powerRows = {};
 })();
 
 // ---- map helpers ----
-const TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const TILE_OPTS = {attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom: 18};
+// CARTO started stamping "API KEY REQUIRED" across their free basemap tiles in
+// Aug 2026. The tile still returns HTTP 200 with a valid PNG, so nothing errors,
+// the watermark is just baked into the image. Switched to Esri's light gray
+// canvas, which needs no key. Base and labels are separate layers.
+const TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const TILES_LABELS = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+const TILE_OPTS = {attribution:'Tiles &copy; Esri', maxZoom: 18, maxNativeZoom: 16};
 function routeMap(divId, pl, interactive){
   const map = L.map(divId, {zoomControl:interactive, dragging:interactive, scrollWheelZoom:false,
     doubleClickZoom:interactive, boxZoom:false, keyboard:false, touchZoom:interactive, attributionControl:false});
   L.tileLayer(TILES, TILE_OPTS).addTo(map);
+  L.tileLayer(TILES_LABELS, {maxZoom:18, maxNativeZoom:16}).addTo(map);
   const line = L.polyline(pl, {color:"#fc5200", weight:4, opacity:.95}).addTo(map);
   L.circleMarker(pl[0], {radius:6, color:"#ffffff", weight:2, fillColor:"#12813f", fillOpacity:1}).addTo(map);
   L.circleMarker(pl[pl.length-1], {radius:6, color:"#ffffff", weight:2, fillColor:"#fc5200", fillOpacity:1}).addTo(map);
@@ -413,6 +419,7 @@ function routeMap(divId, pl, interactive){
   // their licences require. Do not swap this for attributionControl:false.
   map.attributionControl.setPrefix('');
   L.tileLayer(TILES, TILE_OPTS).addTo(map);
+  L.tileLayer(TILES_LABELS, {maxZoom:18, maxNativeZoom:16}).addTo(map);
   let bounds = null;
   D.segs.forEach(sg=>{
     const line = L.polyline(sg.pl, {color:"#fc5200", weight:4, opacity:.9}).addTo(map);
