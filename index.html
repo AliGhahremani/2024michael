@@ -82,6 +82,31 @@
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
   .tblwrap .tbl{min-width:790px}
   @media(max-width:800px){.seg-body{grid-template-columns:1fr;padding:16px 14px 18px}.seg-head{padding:18px 16px 0}.stats{padding:14px 16px 0}}
+  /* Phones: shrink the segment header so name, location and the Strava button sit
+     on one line, and lock the five stat bubbles to exactly two rows.
+     Grid, not flex: flex wrapping depends on text width, so a long value could
+     spill onto a third row. Explicit placement cannot. */
+  @media(max-width:560px){
+    /* Deterministic two-line header: row 1 is number + name, row 2 is location
+       with the Strava button pushed right. h3 grows to fill row 1, which forces
+       the wrap in the same place on every segment regardless of name length. */
+    .seg-head{gap:4px 8px;padding:16px 14px 0;align-items:center}
+    .seg-head .num{font-size:10.5px;letter-spacing:.1em}
+    /* Scales with the viewport so a wider rendering of Archivo Black still fits. */
+    .seg-head h3{font-size:clamp(13px,4.1vw,15px);letter-spacing:0;flex:1 1 auto;line-height:1.15;min-width:0}
+    .seg-head .loc{font-size:11px}
+    .seg-head a{font-size:10.5px;padding:3px 8px;margin-left:auto}
+
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 14px 0}
+    .stat{min-width:0;padding:6px 9px;overflow-wrap:anywhere}
+    .stat .k{font-size:9px;letter-spacing:.08em}
+    .stat .v{font-size:14px;margin-top:1px}
+    /* Row 1: Distance, Elev Gain, Avg Grade. Row 2: Climb Cat, then Segment
+       Traffic across the remaining two columns. Always two rows, never three. */
+    .stat:nth-child(4){grid-column:1}
+    .stat:nth-child(5){grid-column:2 / span 2}
+    .stat:nth-child(5) .v{font-size:11px;line-height:1.3;padding-top:0 !important}
+  }
   .routebox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column}
   .segmap{height:240px;border-radius:8px}
   .routebox .lg{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;font-family:'JetBrains Mono',monospace;padding:0 4px 2px}
