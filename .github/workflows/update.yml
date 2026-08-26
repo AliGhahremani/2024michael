@@ -2,7 +2,9 @@ name: Update standings
 
 on:
   schedule:
-    - cron: "0 15 * * *"   # 15:00 UTC = 8:00 AM PDT (7:00 AM PST in winter)
+    # Cron is UTC and cannot follow daylight saving, so run one or the other by month.
+    - cron: "0 15 * 3-10 *"      # 15:00 UTC = 8:00 AM PDT (Mar-Oct)
+    - cron: "0 16 * 1,2,11,12 *" # 16:00 UTC = 8:00 AM PST (Nov-Feb)
   workflow_dispatch: {}
 
 permissions:
