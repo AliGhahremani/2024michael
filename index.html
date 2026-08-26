@@ -36,7 +36,7 @@
   .score h2,.arena h2,.segs h2,.rules h2{font-family:'Archivo Black';font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
   .score .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
   .pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;box-shadow:0 1px 6px rgba(20,20,30,.05)}
-  .pcard .photo{width:100%;aspect-ratio:480/340;height:auto;object-fit:contain;display:block;background:var(--card2)}
+  .pcard .photo{width:100%;aspect-ratio:3/4;height:auto;object-fit:contain;display:block;background:var(--card2)}
   .pcard.leader{border-color:var(--orange);box-shadow:0 2px 10px rgba(252,82,0,.16)}
   .pcard .medal{position:absolute;top:10px;left:10px;font-family:'Archivo Black';font-size:13px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
   .pcard .jersey{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;background:var(--orange);color:#fff;border-radius:6px;padding:4px 8px;text-transform:uppercase}
@@ -151,10 +151,7 @@
 
 <script src="data.js"></script>
 <script src="avatars.js"></script>
-<script src="photos-ali.js"></script>
-<script src="photos-jake.js"></script>
-<script src="photos-randee.js"></script>
-<script src="photos-michael.js"></script>
+<script>window.PHOTOS={Ali:"photos/ali.webp",Jake:"photos/jake.webp",Randee:"photos/randee.webp",Michael:"photos/michael.webp"};</script>
 <script>
 const D = window.SITE_DATA;
 const AV = window.AVATARS || {};
@@ -257,7 +254,7 @@ const powerRows = {};
   let html = "";
   order.forEach(([name,t],i)=>{
     const isM = name===MICHAEL;
-    const photo = PH[name] ? '<img class="photo" src="'+PH[name]+'" alt="'+name+'">' :
+    const photo = PH[name] ? '<img class="photo" loading="lazy" decoding="async" src="'+PH[name]+'" alt="'+name+'">' :
       (AV[name] ? '<img class="photo" src="'+AV[name]+'" alt="'+name+'">' : '');
     const gapline = i===0 ? 'race leader' : '+'+fmtClock(t-leadTime);
     const penTxt = penalties[name] ? ' · '+penalties[name]+' DNS penalt'+(penalties[name]>1?'ies':'y') : '';
