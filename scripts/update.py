@@ -21,41 +21,87 @@ TRACKED = {s["id"] for s in _meta["segments"]}
 OVERLAP = 3 * 86400  # re-scan 3 days back to catch late uploads
 PWINDOWS = [300, 600, 1200, 1800, 3600]  # power best-effort windows (sec)
 
-# Strava Standard Tier: 200 reads / 15 min, 2000 reads / day, shared across ALL
-# riders because the limit is per application. A first-time backfill of one rider
-# with several hundred activities will exceed the 15 minute window, so the script
-# waits it out, and stops cleanly when this run's budget is gone.
-READ_BUDGET = 1200          # calls per run, well under the 2000/day ceiling
-MAX_429_WAITS = 4           # at most ~4 x 15 min of waiting in one run
-_reads = {"n": 0, "waits": 0}
+# Rate limits, per https://developers.strava.com/docs/rate-limits/
+#   - limits are per APPLICATION, so all four riders share one pool
+#   - 15 minute windows align to :00, :15, :30, :45 past the hour
+#   - the daily allowance resets at midnight UTC
+#   - requests that violate the short term limit STILL COUNT toward the daily
+#     total, so blind retrying is actively expensive
+# Strava reports usage on every response via X-ReadRateLimit-Usage / -Limit, each
+# "fifteen_minute,daily". We read those instead of guessing, which is the whole
+# reason this is not just a hardcoded counter.
+DAILY_RESERVE = 60          # leave this many daily reads unused, as headroom
+MAX_WINDOW_WAITS = 4        # at most ~4 x 15 min of waiting in a single run
+_rl = {"reads": 0, "waits": 0, "win_used": None, "win_limit": None,
+       "day_used": None, "day_limit": None}
 
 class BudgetExhausted(Exception):
-    """This run has used its share of the daily rate limit. Save and resume tomorrow."""
+    """Out of rate limit for now. Save progress and resume on the next run."""
+
+def _note_limits(headers):
+    """Record Strava's own usage figures from the response headers."""
+    usage = headers.get("X-ReadRateLimit-Usage") or headers.get("X-RateLimit-Usage")
+    limit = headers.get("X-ReadRateLimit-Limit") or headers.get("X-RateLimit-Limit")
+    if not usage or not limit:
+        return
+    try:
+        wu, du = [int(x) for x in usage.split(",")[:2]]
+        wl, dl = [int(x) for x in limit.split(",")[:2]]
+    except ValueError:
+        return
+    _rl.update(win_used=wu, win_limit=wl, day_used=du, day_limit=dl)
+
+def _seconds_to_next_window():
+    """Windows align to :00, :15, :30, :45. Add slack so we land inside the next one."""
+    return 15 * 60 - (int(time.time()) % (15 * 60)) + 15
 
 def http(url, data=None, token=None):
     is_read = data is None
-    if is_read and _reads["n"] >= READ_BUDGET:
-        raise BudgetExhausted(f"run budget of {READ_BUDGET} reads reached")
-    for attempt in range(MAX_429_WAITS + 1):
+    for attempt in range(MAX_WINDOW_WAITS + 1):
+        # If Strava has told us the daily allowance is effectively gone, stop now.
+        # Waiting cannot help: the daily counter only resets at midnight UTC.
+        if is_read and _rl["day_limit"] is not None:
+            if _rl["day_limit"] - _rl["day_used"] <= DAILY_RESERVE:
+                raise BudgetExhausted(
+                    f"daily read limit nearly spent ({_rl['day_used']}/{_rl['day_limit']}); "
+                    f"resets at midnight UTC")
+        # If the 15 minute window is nearly spent, wait for it rather than
+        # spending requests on 429s, which still count against the daily total.
+        if is_read and _rl["win_limit"] is not None and attempt == 0:
+            if _rl["win_limit"] - _rl["win_used"] <= 2 and _rl["waits"] < MAX_WINDOW_WAITS:
+                _rl["waits"] += 1
+                w = _seconds_to_next_window()
+                print(f"15 min window nearly spent ({_rl['win_used']}/{_rl['win_limit']}). "
+                      f"waiting {w}s [daily {_rl['day_used']}/{_rl['day_limit']}]", flush=True)
+                time.sleep(w)
+
         req = urllib.request.Request(url, data=data)
         if token:
             req.add_header("Authorization", f"Bearer {token}")
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
+                _note_limits(r.headers)
                 if is_read:
-                    _reads["n"] += 1
+                    _rl["reads"] += 1
                 return json.loads(r.read().decode())
         except urllib.error.HTTPError as e:
+            _note_limits(e.headers)
             if e.code != 429:
                 raise
-            if attempt >= MAX_429_WAITS:
-                raise BudgetExhausted("still rate limited after waiting")
-            _reads["waits"] += 1
-            # Wait out the current 15 minute window, plus a little slack.
-            wait = 15 * 60 - (int(time.time()) % (15 * 60)) + 20
-            print(f"rate limited (429). waiting {wait}s for the window to reset "
-                  f"[{_reads['n']} reads used this run]", flush=True)
-            time.sleep(wait)
+            # A 429 that is really the daily cap cannot be waited out.
+            if _rl["day_limit"] is not None and _rl["day_used"] >= _rl["day_limit"]:
+                raise BudgetExhausted(
+                    f"daily read limit reached ({_rl['day_used']}/{_rl['day_limit']}); "
+                    f"resets at midnight UTC")
+            if attempt >= MAX_WINDOW_WAITS:
+                raise BudgetExhausted("still rate limited after waiting out the windows")
+            _rl["waits"] += 1
+            w = _seconds_to_next_window()
+            print(f"429. waiting {w}s for the window "
+                  f"[window {_rl['win_used']}/{_rl['win_limit']}, "
+                  f"daily {_rl['day_used']}/{_rl['day_limit']}, "
+                  f"{_rl['reads']} reads this run]", flush=True)
+            time.sleep(w)
     raise BudgetExhausted("unreachable")
 
 def refresh_access_token(client_id, client_secret, refresh_token):
@@ -304,6 +350,9 @@ def main():
         json.dump(payload, f, separators=(",", ":"))
         f.write(";\n")
 
+    print(f"RATE LIMIT: {_rl['reads']} reads this run, {_rl['waits']} window waits. "
+          f"Strava reports window {_rl['win_used']}/{_rl['win_limit']}, "
+          f"daily {_rl['day_used']}/{_rl['day_limit']}.")
     print("SUMMARY:", "; ".join(summary) if summary else "no PR changes")
 
 if __name__ == "__main__":
