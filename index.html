@@ -110,6 +110,8 @@
   footer{border-top:1px solid var(--line);padding:34px 0 46px;color:var(--muted);font-size:13px;background:#fff}
   footer .big{font-family:'Archivo Black';color:var(--text);font-size:16px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
   footer a{color:var(--orange);text-decoration:none}
+  a.slink{color:inherit;text-decoration:none;border-bottom:1px dotted rgba(252,82,0,.55)}
+  a.slink:hover{color:var(--orange);border-bottom-color:var(--orange)}
   .leaflet-container{background:#e9e9ee;font-family:'Archivo',sans-serif}
 </style>
 </head>
@@ -147,9 +149,7 @@
 </div></section>
 
 <footer><div class="wrap">
-  <div class="big">Are <em style="color:var(--orange)">you</em> stronger than 2024 Michael?</div>
-  <p>Rider times update automatically from the Strava API. Michael's benchmark is frozen forever. That's the point. Some of his PRs date to 2023 or 2025; he claims them all anyway, which is very on brand. Attempt counts shown only where an athlete's own data authorizes it.</p>
-  <p style="margin-top:8px">Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
+  <p>Last updated: <span id="updated">…</span> · Data from <a href="https://www.strava.com">Strava</a>.</p>
 </div></footer>
 
 <script src="data.js"></script>
@@ -159,6 +159,11 @@
 const D = window.SITE_DATA;
 const AV = window.AVATARS || {};
 const PH = window.PHOTOS || {};
+const LINKS = (window.SITE_DATA && window.SITE_DATA.links) || {};
+// Wrap a rider's name in a link to their Strava profile, when we have their id.
+const nameLink = (name, inner) => LINKS[name]
+  ? '<a class="slink" href="'+LINKS[name]+'" target="_blank" rel="noopener noreferrer">'+inner+'</a>'
+  : inner;
 const avImg = (name, cls) => AV[name] ? '<img class="'+cls+'" src="'+AV[name]+'" alt="'+name+'">' : '';
 const MICHAEL = "Michael";
 const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
@@ -278,7 +283,7 @@ const powerRows = {};
     html += '<div class="pcard'+(i===0?' leader':'')+'">'+photo+
       '<span class="medal">'+medals[i]+'</span>'+
       (i===0?'<span class="jersey">Yellow Jersey</span>':'')+
-      '<div class="body"><div class="nm">'+name+'</div><div class="rl">'+(isM?'Parker · the benchmark':(SURNAMES[name]||''))+'</div>'+
+      '<div class="body"><div class="nm">'+nameLink(name,name)+'</div><div class="rl">'+(isM?'Parker · the benchmark':(SURNAMES[name]||''))+'</div>'+
       '<div class="tot">'+fmtClock(t)+'</div>'+
       '<div class="gapline">'+gapline+'</div>'+
       '<div class="sub2">'+ridden[name]+' of '+D.segs.length+' segments ridden'+penTxt+'</div>'+
@@ -340,7 +345,7 @@ function routeMap(divId, pl, interactive){
       else pill = '<span class="pill no">NO</span><span class="gap">'+fmtGap(r.sec,m.sec)+'</span>';
       const attTxt = r.attempts!=null ? " · "+r.attempts+" attempts" : "";
       return '<tr class="'+(isM?"mrow":"")+'"><td class="rk">'+(r.sec==null?"—":rank)+'</td>'+
-        '<td class="rider">'+avImg(r.name,"rav")+r.name+'</td><td class="time">'+r.time+'</td>'+
+        '<td class="rider">'+avImg(r.name,"rav")+nameLink(r.name,r.name)+'</td><td class="time">'+r.time+'</td>'+
         '<td class="spd">'+fmtSpeed(r.sec, sg.dist)+'</td>'+
         '<td class="date">'+r.date+attTxt+'</td>'+
         '<td class="pw">'+(r.watts?r.watts+" W":"\u2014")+'</td>'+
