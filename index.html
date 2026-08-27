@@ -199,9 +199,9 @@ const nameLink = (name, inner) => LINKS[name]
 const avImg = (name, cls) => AV[name] ? '<img class="'+cls+'" src="'+AV[name]+'" alt="'+name+'">' : '';
 const MICHAEL = "Michael";
 const SURNAMES = {Randee:"Tolentino", Jake:"Graves", Ali:"Ghahremani"};
-// weights in lbs. Randee and Michael confirmed by Ali 2026-08-26.
-// Ali and Jake still unconfirmed. Only affects the W/kg display, never the GC.
-const WEIGHT_LBS = {Ali:183, Michael:175, Randee:187, Jake:190};
+// weights in lbs. Ali 181, Michael 175, Randee 187 confirmed by Ali.
+// Jake 190 still unconfirmed. Only affects the W/kg display, never the GC.
+const WEIGHT_LBS = {Ali:181, Michael:175, Randee:187, Jake:190};
 const KG = {}; for (const k in WEIGHT_LBS) KG[k] = WEIGHT_LBS[k]/2.20462;
 document.getElementById("updated").textContent = D.updated;
 if (AV.Michael) document.getElementById("mpdot").innerHTML = '<img src="'+AV.Michael+'" alt="Michael">';
