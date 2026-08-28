@@ -2,28 +2,28 @@
   "riders": {
     "ali": {
       "attempts_populated": 14,
-      "activities_seen": 1
+      "activities_seen": 2
     },
     "jake": {
       "attempts_populated": 14,
-      "activities_seen": 195
+      "activities_seen": 2
     },
     "randee": {
       "attempts_populated": 14,
-      "activities_seen": 399
+      "activities_seen": 3
     },
     "michael": {
       "attempts_populated": 14,
-      "activities_seen": 154
+      "activities_seen": 5
     }
   },
   "notes": [],
   "effort_count_supported": true,
-  "finished_utc": "2026-08-26T17:05:02Z",
-  "reads_this_run": 942,
-  "window_waits": 3,
-  "rate_limit_window": "184/200",
-  "rate_limit_daily": "1369/2000",
+  "finished_utc": "2026-08-28T00:20:49Z",
+  "reads_this_run": 76,
+  "window_waits": 0,
+  "rate_limit_window": "68/200",
+  "rate_limit_daily": "327/2000",
   "tokens_present": [
     "ali",
     "jake",
@@ -31,12 +31,6 @@
     "randee"
   ],
   "tokens_missing": [],
-  "changes": [
-    "Jake new 60 min power: 219 W",
-    "Jake new 5 min power: 355 W",
-    "Jake new 30 min power: 245 W",
-    "Randee new 5 min power: 316 W",
-    "Randee new 10 min power: 281 W"
-  ],
+  "changes": [],
   "backfill_complete": true
 }
