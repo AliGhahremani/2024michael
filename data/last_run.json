@@ -2,7 +2,7 @@
   "riders": {
     "ali": {
       "attempts_populated": 14,
-      "activities_seen": 2
+      "activities_seen": 3
     },
     "jake": {
       "attempts_populated": 14,
@@ -10,20 +10,20 @@
     },
     "randee": {
       "attempts_populated": 14,
-      "activities_seen": 4
+      "activities_seen": 5
     },
     "michael": {
       "attempts_populated": 14,
-      "activities_seen": 2
+      "activities_seen": 1
     }
   },
   "notes": [],
   "effort_count_supported": true,
-  "finished_utc": "2026-10-30T19:54:18Z",
-  "reads_this_run": 73,
+  "finished_utc": "2026-10-31T19:12:45Z",
+  "reads_this_run": 74,
   "window_waits": 0,
-  "rate_limit_window": "67/200",
-  "rate_limit_daily": "175/2000",
+  "rate_limit_window": "68/200",
+  "rate_limit_daily": "154/2000",
   "tokens_present": [
     "ali",
     "jake",
