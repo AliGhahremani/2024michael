@@ -6,11 +6,11 @@
     },
     "jake": {
       "attempts_populated": 14,
-      "activities_seen": 1
+      "activities_seen": 2
     },
     "randee": {
       "attempts_populated": 14,
-      "activities_seen": 4
+      "activities_seen": 5
     },
     "michael": {
       "attempts_populated": 14,
@@ -19,11 +19,11 @@
   },
   "notes": [],
   "effort_count_supported": true,
-  "finished_utc": "2026-11-13T21:45:17Z",
-  "reads_this_run": 64,
+  "finished_utc": "2026-11-14T20:16:38Z",
+  "reads_this_run": 70,
   "window_waits": 0,
-  "rate_limit_window": "25/200",
-  "rate_limit_daily": "149/2000",
+  "rate_limit_window": "65/200",
+  "rate_limit_daily": "155/2000",
   "tokens_present": [
     "ali",
     "jake",
