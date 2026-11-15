@@ -2,7 +2,7 @@
   "riders": {
     "ali": {
       "attempts_populated": 14,
-      "activities_seen": 0
+      "activities_seen": 1
     },
     "jake": {
       "attempts_populated": 14,
@@ -10,20 +10,20 @@
     },
     "randee": {
       "attempts_populated": 14,
-      "activities_seen": 5
+      "activities_seen": 4
     },
     "michael": {
       "attempts_populated": 14,
-      "activities_seen": 2
+      "activities_seen": 1
     }
   },
   "notes": [],
   "effort_count_supported": true,
-  "finished_utc": "2026-11-14T20:16:38Z",
-  "reads_this_run": 70,
+  "finished_utc": "2026-11-15T20:42:32Z",
+  "reads_this_run": 72,
   "window_waits": 0,
-  "rate_limit_window": "65/200",
-  "rate_limit_daily": "155/2000",
+  "rate_limit_window": "66/200",
+  "rate_limit_daily": "162/2000",
   "tokens_present": [
     "ali",
     "jake",
@@ -31,6 +31,9 @@
     "randee"
   ],
   "tokens_missing": [],
-  "changes": [],
+  "changes": [
+    "Ali new PR on segment 633514: 7:45",
+    "Randee new PR on segment 633514: 7:52"
+  ],
   "backfill_complete": true
 }
