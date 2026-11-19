@@ -1,10 +1,10 @@
 {
-  "updated": "Nov 18, 2026",
+  "updated": "Nov 19, 2026",
   "athletes": {
     "ali": {
       "id": 20156041,
       "display": "Ali",
-      "last_epoch": 1795042048,
+      "last_epoch": 1795128663,
       "bests": {
         "649404": {
           "sec": 256,
@@ -119,7 +119,7 @@
     "jake": {
       "id": 2977194,
       "display": "Jake",
-      "last_epoch": 1795042059,
+      "last_epoch": 1795128676,
       "bests": {
         "649404": {
           "sec": 258,
@@ -229,7 +229,7 @@
     "randee": {
       "id": 100854849,
       "display": "Randee",
-      "last_epoch": 1795042071,
+      "last_epoch": 1795128687,
       "bests": {
         "649404": {
           "sec": 245,
@@ -317,7 +317,7 @@
         }
       },
       "attempts": {
-        "649404": 9,
+        "649404": 10,
         "7855869": 109,
         "913750": 27,
         "618874": 25,
@@ -344,7 +344,7 @@
     "michael": {
       "id": 37685935,
       "display": "Michael",
-      "last_epoch": 1795042086,
+      "last_epoch": 1795128703,
       "bests": {
         "649404": {
           "sec": 263,

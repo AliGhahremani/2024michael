@@ -19,11 +19,11 @@
   },
   "notes": [],
   "effort_count_supported": true,
-  "finished_utc": "2026-11-18T22:48:15Z",
+  "finished_utc": "2026-11-19T22:51:53Z",
   "reads_this_run": 80,
   "window_waits": 0,
   "rate_limit_window": "70/200",
-  "rate_limit_daily": "161/2000",
+  "rate_limit_daily": "159/2000",
   "tokens_present": [
     "ali",
     "jake",
